@@ -9,10 +9,15 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ijspr-sarthakkeches-projects.vercel.app"
+];
 // ⚡ Allow all origins (CORS for deployment)
+
 app.use(cors({
-  origin: "*", // Allow all domains
-  credentials: true,
+  origin: allowedOrigins,
+  credentials: true
 }));
 
 dotenv.config();
