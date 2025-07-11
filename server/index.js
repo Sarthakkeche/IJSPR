@@ -8,18 +8,11 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://ijspr-sarthakkeches-projects.vercel.app"
 ];
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed for this origin: " + origin));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "*", // allow any frontend
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 const PORT = process.env.PORT || 5000;
 
 // Middleware
