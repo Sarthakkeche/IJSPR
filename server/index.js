@@ -4,17 +4,10 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(express.json());
-
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ijspr-sarthakkeches-projects.vercel.app"
 ];
-// ⚡ Allow all origins (CORS for deployment)
-
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -27,6 +20,15 @@ app.use(
     credentials: true,
   })
 );
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
+
+
+// ⚡ Allow all origins (CORS for deployment)
+
+
 
 dotenv.config();
 // POST route to send mail
