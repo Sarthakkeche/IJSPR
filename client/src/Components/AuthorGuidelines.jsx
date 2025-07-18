@@ -29,7 +29,7 @@ const GuidelinesContent = () => {
             Guidelines for <span className="text-orange-400">Authors</span>
           </h1>
           <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
-            Ensure your submission to IJSRI meets our high standards of formatting, ethics, and integrity.
+            Ensure your submission to IJIST meets our high standards of formatting, ethics, and integrity.
           </p>
         </div>
       </section>
