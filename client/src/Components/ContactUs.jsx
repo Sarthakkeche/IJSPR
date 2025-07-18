@@ -72,7 +72,7 @@ const ContactUsContent = () => {
           {
             icon: "📞",
             title: "Phone",
-            value: "+91 98765 43210",
+            value: "+91 9657778471",
           },
           {
             icon: "📧",
@@ -82,7 +82,7 @@ const ContactUsContent = () => {
           {
             icon: "📍",
             title: "Address",
-            value: "Mumbai, Maharashtra, India",
+            value: "Amravti, Maharashtra, India",
           },
         ].map((item, i) => (
           <div

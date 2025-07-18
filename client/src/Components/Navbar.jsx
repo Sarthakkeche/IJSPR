@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { FiMenu, FiX, FiChevronDown, FiSearch } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import { useLocation, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
@@ -23,13 +24,13 @@ const Navbar = () => {
     },
     // { name: "Issue", to: "/issue" },
     { name: "Tools For Author", to: "/tools" },
-    {
-      name: "Blogs",
-      dropdown: [
-        { name: "Research Tips", to: "/blogs/research-tips" },
-        { name: "Publishing News", to: "/blogs/news" },
-      ],
-    },
+    // {
+    //   name: "Blogs",
+    //   dropdown: [
+    //     { name: "Research Tips", to: "/blogs/research-tips" },
+    //     { name: "Publishing News", to: "/blogs/news" },
+    //   ],
+    // },
     { name: "Contact Us", to: "/contact" },
   ];
 
@@ -43,6 +44,34 @@ const Navbar = () => {
       setActiveDropdown(null);
     }, 100);
   };
+
+
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  // Map search terms to routes
+  const routeMap = {
+    "home": "/",
+    "about us": "/about",
+    "about":"/about",
+    "contact": "/contact",
+    "editorial board": "/Eboard",
+    "guidelines": "/subguide",
+    "submit paper": "/submit",
+    "archives": "/archives",
+  };
+
+  const handleSearch = (e) => {
+  if (e.key === "Enter") {
+    const searchKey = query.trim().toLowerCase();
+
+    if (routeMap[searchKey]) {
+      navigate(routeMap[searchKey]); // Absolute path
+    } else {
+      alert("❌ Invalid search! Page not found.");
+    }
+  }
+};
 
   return (
     <nav className="w-full fixed top-0 left-0 z-[9999] bg-white shadow">
@@ -109,13 +138,16 @@ const Navbar = () => {
       {/* Bottom Bar */}
       <div className="bg-black text-white px-4 py-2 flex flex-col md:flex-row items-center justify-end md:px-8 gap-3">
         <div className="flex items-center bg-gray-900 rounded-full px-3 py-1 w-full md:w-1/3">
-          <FiSearch className="text-gray-400 mr-2" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent outline-none w-full text-sm text-white"
-          />
-        </div>
+      <FiSearch className="text-gray-400 mr-2" />
+      <input
+        type="text"
+        placeholder="Search..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={handleSearch}
+        className="bg-transparent outline-none w-full text-sm text-white"
+      />
+    </div>
         <button className="bg-orange-500 px-5 py-2 rounded-full text-white font-medium hover:bg-orange-600 transition">
           Submit Manuscript
         </button>

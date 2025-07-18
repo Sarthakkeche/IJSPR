@@ -10,14 +10,14 @@ import ScrollToTop from "./ScrollToTop";
 const RoutesConfig = () => {
   return useRoutes([
     { path: "/", element: <Home /> },
-    { path:"about", element:<AboutUsContent/>},
-    { path:"contact",element:<ContactUsContent/>},
-    {path:"Eboard",element:<EditorialBoard/>},
+    { path:"/about", element:<AboutUsContent/>},
+    { path:"/contact",element:<ContactUsContent/>},
+    {path:"/Eboard",element:<EditorialBoard/>},
     {
-      path:"subguide",element:<GuidelinesContent/>
+      path:"/subguide",element:<GuidelinesContent/>
     },
     {
-      path:"InfoAuthors",element:<InfoAuthors/>
+      path:"/InfoAuthors",element:<InfoAuthors/>
     },
     
     
