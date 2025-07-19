@@ -194,7 +194,7 @@ const EditorialBoard = () => {
             Editorial <span className="text-orange-400">Board</span>
           </h1>
           <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
-            Meet the experts behind IJSRI—our editorial board ensures the highest standards of
+            Meet the experts behind IJIST—our editorial board ensures the highest standards of
             integrity, quality, and innovation across scientific disciplines.
           </p>
         </div>
