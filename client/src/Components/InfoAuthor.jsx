@@ -31,7 +31,7 @@ const InfoAuthors = () => {
             Information for <span className="text-orange-400">Authors</span>
           </h1>
           <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
-            Ensure your submission to IJIST meets our high standards of formatting, ethics, and integrity.
+            Ensure your submission to IJRWS meets our high standards of formatting, ethics, and integrity.
           </p>
         </div>
       </section>
@@ -46,9 +46,9 @@ const InfoAuthors = () => {
           <div>
             <h2 className="text-2xl font-bold text-orange-500 mb-4">GENERAL</h2>
             <p className="mb-2">
-              The   International Journal of Ideation in Science and Technology(IJIST), an official publication of IJIST, is published by Medknow Publications, Mumbai, India, monthly in each year. Our website is SSL-certified (HTTPS):{" "}
+              The  International journal of Research welfare society(IJRWS), an official publication of IJRWS, is published by Medknow Publications, Mumbai, India, monthly in each year. Our website is SSL-certified (HTTPS):{" "}
               <a href="https://www.ijsri.org" className="text-blue-600 underline">
-                www.ijist.com
+                www.IJRWS.com
               </a>. The e-mail ID is{" "}
               <a href="mailto:editorijsrijournal@gmail.com" className="text-blue-600 underline">
                 editorijsrijournal@gmail.com
@@ -60,7 +60,7 @@ const InfoAuthors = () => {
           <div>
             <h2 className="text-2xl font-bold text-orange-500 mb-4">Scope</h2>
             <p>
-The   International Journal of Ideation in Science and Technology (IJIST) focuses on publishing high-quality, peer-reviewed research that advances knowledge across a broad spectrum of scientific and interdisciplinary fields. The journal welcomes original articles, reviews, case studies, and brief reports that demonstrate innovation, relevance, and scientific integrity. Areas of interest include, but are not limited to, life sciences, health and pharmaceutical sciences, environmental studies, engineering, biotechnology, bioinformatics, public health, and management sciences. IJSRI encourages contributions that promote academic excellence, practical impact, and global scientific dialogue.            </p>
+The  International journal of Research welfare society(IJRWS) focuses on publishing high-quality, peer-reviewed research that advances knowledge across a broad spectrum of scientific and interdisciplinary fields. The journal welcomes original articles, reviews, case studies, and brief reports that demonstrate innovation, relevance, and scientific integrity. Areas of interest include, but are not limited to, life sciences, health and pharmaceutical sciences, environmental studies, engineering, biotechnology, bioinformatics, public health, and management sciences. IJSRI encourages contributions that promote academic excellence, practical impact, and global scientific dialogue.            </p>
           </div>
 
           {/* PREPARATION OF MANUSCRIPT */}

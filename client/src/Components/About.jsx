@@ -45,17 +45,17 @@ const AboutUsContent = () => {
           <div >
             <h2 className="text-2xl font-bold mb-4 text-orange-500">Who We Are</h2>
             <p className="mb-3">
-The   International Journal of Ideation in Science and Technology (IJIST) is a leading peer-reviewed, open-access, multidisciplinary journal dedicated to the publication of high-quality and impactful scholarly works. IJIST serves as a dynamic global platform for the dissemination of original research, reviews, short communications, case reports, Ethics Forum contributions, Education Forum discussions, and Letters to the Editor.            </p>
+The   International journal of Research welfare society (IJRWS) is a leading peer-reviewed, open-access, multidisciplinary journal dedicated to the publication of high-quality and impactful scholarly works. IJRWS serves as a dynamic global platform for the dissemination of original research, reviews, short communications, case reports, Ethics Forum contributions, Education Forum discussions, and Letters to the Editor.            </p>
             <p>
 The journal is committed to advancing scientific knowledge across a wide range of disciplines, including: Life Sciences, Pharmaceutical Sciences, Health Sciences, Clinical and Biomedical Research, Biotechnology, Chemistry, Environmental Science, Bioinformatics, Public Health, Management Sciences, Engineering and Allied Technologies.             </p>
 <p>
-  IJIST welcomes submissions from researchers, academicians, professionals, practitioners, and students worldwide. We encourage both empirical and theoretical research papers, literature reviews, conceptual frameworks, simulation models, analytical studies, case reports, and technical notes that demonstrate innovation, relevance, and scholarly excellence.
+  IJRWS welcomes submissions from researchers, academicians, professionals, practitioners, and students worldwide. We encourage both empirical and theoretical research papers, literature reviews, conceptual frameworks, simulation models, analytical studies, case reports, and technical notes that demonstrate innovation, relevance, and scholarly excellence.
 </p>
 <p>
   Our mission is to foster a collaborative and inclusive research culture that bridges gaps between disciplines and supports the global exchange of scientific ideas. We place a strong emphasis on novel insights, timely relevance, and innovative concepts that contribute meaningfully to the academic and professional communities.
 </p>
 <p>
-  By maintaining rigorous peer-review standards and ensuring open accessibility, IJIST aspires to be a trusted resource for high-quality research and a catalyst for scientific advancement across disciplines.
+  By maintaining rigorous peer-review standards and ensuring open accessibility, IJRWS aspires to be a trusted resource for high-quality research and a catalyst for scientific advancement across disciplines.
 </p>
           </div>
         </div>
@@ -70,12 +70,12 @@ The journal is committed to advancing scientific knowledge across a wide range o
           <div className="p-6 bg-blue-100 rounded-lg shadow-md" data-aos="fade-up-right">
             <h3 className="text-xl font-semibold mb-2 text-blue-900">Primary Aim </h3>
             <p>
-The   International Journal of Ideation in Science and Technology (IJIST) aims to advance scientific knowledge by publishing high-quality, peer-reviewed, open-access research across a broad range of disciplines. It promotes global collaboration, interdisciplinary dialogue, and innovation by welcoming contributions from researchers, professionals, and students worldwide. IJIST strives to be a trusted platform for impactful research that supports academic excellence and meaningful scientific exchange.            </p>
+The   International journal of Research welfare society (IJRWS) aims to advance scientific knowledge by publishing high-quality, peer-reviewed, open-access research across a broad range of disciplines. It promotes global collaboration, interdisciplinary dialogue, and innovation by welcoming contributions from researchers, professionals, and students worldwide. IJRWS strives to be a trusted platform for impactful research that supports academic excellence and meaningful scientific exchange.            </p>
           </div>
           <div className="p-6 bg-orange-100 rounded-lg shadow-md" data-aos="fade-up-left">
             <h3 className="text-xl font-semibold mb-2 text-orange-900">Focus and Scope</h3>
             <p>
-The   International Journal of Ideation in Science and Technology (IJIST) focuses on publishing high-quality, peer-reviewed research that advances knowledge across a broad spectrum of scientific and interdisciplinary fields. The journal welcomes original articles, reviews, case studies, and brief reports that demonstrate innovation, relevance, and scientific integrity. Areas of interest include, but are not limited to, life sciences, health and pharmaceutical sciences, environmental studies, engineering, biotechnology, bioinformatics, public health, and management sciences. IJIST encourages contributions that promote academic excellence, practical impact, and global scientific dialogue.            </p>
+The   International journal of Research welfare society (IJRWS) focuses on publishing high-quality, peer-reviewed research that advances knowledge across a broad spectrum of scientific and interdisciplinary fields. The journal welcomes original articles, reviews, case studies, and brief reports that demonstrate innovation, relevance, and scientific integrity. Areas of interest include, but are not limited to, life sciences, health and pharmaceutical sciences, environmental studies, engineering, biotechnology, bioinformatics, public health, and management sciences. IJRWS encourages contributions that promote academic excellence, practical impact, and global scientific dialogue.            </p>
           </div>
         </div>
       </section>
@@ -85,24 +85,24 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
       <section className="py-16 px-4 md:px-20 bg-blue-50">
   <div className="text-center mb-12" data-aos="fade-down">
     <h2 className="text-3xl font-bold text-orange-500">
-      Why Choose IJIST for Your Research
+      Why Choose IJRWS for Your Research
     </h2>
   </div>
   <div className="grid md:grid-cols-3 gap-8">
     {[
       {
         title: 'Transparent & Rigorous Peer Review',
-        desc: 'At IJIST, every manuscript undergoes a meticulous and unbiased peer-review process conducted by experienced scholars. This ensures that only high-quality, original, and impactful research is accepted. Our commitment to academic integrity and thorough evaluations maintains the credibility and excellence of each publication.',
+        desc: 'At IJRWS, every manuscript undergoes a meticulous and unbiased peer-review process conducted by experienced scholars. This ensures that only high-quality, original, and impactful research is accepted. Our commitment to academic integrity and thorough evaluations maintains the credibility and excellence of each publication.',
         icon: '🔍',
       },
       {
         title: 'Global Visibility with Open Access',
-        desc: 'Publishing with IJIST guarantees that your work is freely accessible to researchers, educators, and institutions around the world. Our open-access model removes paywall barriers, increasing the readership, citation potential, and cross-disciplinary impact of your research. Your findings reach a wider audience—instantly and without restrictions.',
+        desc: 'Publishing with IJRWS guarantees that your work is freely accessible to researchers, educators, and institutions around the world. Our open-access model removes paywall barriers, increasing the readership, citation potential, and cross-disciplinary impact of your research. Your findings reach a wider audience—instantly and without restrictions.',
         icon: '🌐',
       },
       {
         title: 'Collaborative & Recognized Research Community',
-        desc: 'IJIST is more than just a journal—it is a dynamic hub of collaboration. Authors benefit from increased academic recognition, opportunities for global partnerships, and the chance to engage with a diverse community of researchers and professionals. Publishing with IJIST adds credibility to your profile and helps you grow in your academic career.',
+        desc: 'IJRWS is more than just a journal—it is a dynamic hub of collaboration. Authors benefit from increased academic recognition, opportunities for global partnerships, and the chance to engage with a diverse community of researchers and professionals. Publishing with IJRWS adds credibility to your profile and helps you grow in your academic career.',
         icon: '🤝',
       },
     ].map((item, index) => (
@@ -126,7 +126,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
   <div className="text-center mb-12" data-aos="fade-up">
     <h2 className="text-3xl font-bold text-orange-500">Ethics & Guidelines</h2>
     <p className="mt-2 text-gray-600 max-w-2xl mx-auto">
-      The  International Journal of Ideation in Science and Technology(IJIST) is committed to upholding the highest standards of ethical publishing, guided by the COPE framework. Every submission is evaluated with transparency, fairness, and academic rigor.
+      The International journal of Research welfare society(IJRWS) is committed to upholding the highest standards of ethical publishing, guided by the COPE framework. Every submission is evaluated with transparency, fairness, and academic rigor.
     </p>
   </div>
 
@@ -134,7 +134,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="font-semibold text-blue-700 text-base mb-1">1. Ethical Standards and Publishing Integrity</h3>
       <p>
-        IJIST adheres to strict ethical policies at every stage of the publishing process. Our editorial decisions are transparent, fair, and aligned with the Committee on Publication Ethics (COPE) best practices.
+        IJRWS adheres to strict ethical policies at every stage of the publishing process. Our editorial decisions are transparent, fair, and aligned with the Committee on Publication Ethics (COPE) best practices.
       </p>
     </div>
 
@@ -162,7 +162,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="font-semibold text-blue-700 text-base mb-1">5. Double-Blind Peer Review</h3>
       <p>
-        IJIST follows a double-blind peer review process where both authors and reviewers remain anonymous. This ensures unbiased evaluation based solely on scientific merit and relevance. Editors avoid reviewing papers with which they have conflicts.
+        IJRWS follows a double-blind peer review process where both authors and reviewers remain anonymous. This ensures unbiased evaluation based solely on scientific merit and relevance. Editors avoid reviewing papers with which they have conflicts.
       </p>
     </div>
 
@@ -183,14 +183,14 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="font-semibold text-blue-700 text-base mb-1">8. Copyright & Licensing</h3>
       <p>
-        Authors retain copyright of their manuscripts while granting IJIST the right to first publication. All articles are licensed under Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA), supporting open and ethical reuse.
+        Authors retain copyright of their manuscripts while granting IJRWS the right to first publication. All articles are licensed under Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA), supporting open and ethical reuse.
       </p>
     </div>
 
     <div>
       <h3 className="font-semibold text-blue-700 text-base mb-1">9. Post-Publication Review & Corrections</h3>
       <p>
-        IJIST supports post-publication discussions and encourages readers to report concerns. If significant issues arise, the journal will issue corrections, retractions, or editorial notes to preserve the integrity of the scientific record.
+        IJRWS supports post-publication discussions and encourages readers to report concerns. If significant issues arise, the journal will issue corrections, retractions, or editorial notes to preserve the integrity of the scientific record.
       </p>
     </div>
 
@@ -204,7 +204,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="font-semibold text-blue-700 text-base mb-1">11. Avoidance of Predatory Practices</h3>
       <p>
-        IJIST does not collaborate with unauthorized third-party agencies or guarantee publication. All official communications, submissions, and payments must be made directly through the journal’s verified channels with no hidden fees.
+        IJRWS does not collaborate with unauthorized third-party agencies or guarantee publication. All official communications, submissions, and payments must be made directly through the journal’s verified channels with no hidden fees.
       </p>
     </div>
   </div>
@@ -214,7 +214,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
   <div className="text-center mb-12" data-aos="fade-down">
     <h2 className="text-3xl font-bold text-orange-500">Our Commitment to Research Excellence</h2>
     <p className="mt-4 max-w-3xl mx-auto text-gray-700 text-sm leading-relaxed">
-      At the   International Journal of Ideation in Science and Technology(IJIST), we believe advancing knowledge requires more than publication—it demands integrity, quality, and vision. Our platform brings together diverse scientific minds to share impactful discoveries and scholarly insights.
+      At the  International journal of Research welfare society(IJRWS), we believe advancing knowledge requires more than publication—it demands integrity, quality, and vision. Our platform brings together diverse scientific minds to share impactful discoveries and scholarly insights.
     </p>
   </div>
 
@@ -222,7 +222,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="text-lg font-semibold text-blue-700 mb-2">Rigorous Editorial Review</h3>
       <p>
-        Every manuscript submitted to IJIST is evaluated by qualified reviewers and subject-matter experts. We ensure contributions are original, authentic, and relevant, strengthening the global body of scientific knowledge through thorough, fair, and timely assessments.
+        Every manuscript submitted to IJRWS is evaluated by qualified reviewers and subject-matter experts. We ensure contributions are original, authentic, and relevant, strengthening the global body of scientific knowledge through thorough, fair, and timely assessments.
       </p>
     </div>
 
@@ -236,7 +236,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="text-lg font-semibold text-blue-700 mb-2">Empowering Global Collaboration</h3>
       <p>
-        IJIST serves as a global hub for interdisciplinary research. By publishing with us, scholars enhance their visibility, build academic credibility, and contribute to innovation that transcends borders. We support our authors throughout the peer-review and publishing journey.
+        IJRWS serves as a global hub for interdisciplinary research. By publishing with us, scholars enhance their visibility, build academic credibility, and contribute to innovation that transcends borders. We support our authors throughout the peer-review and publishing journey.
       </p>
     </div>
 
@@ -275,7 +275,7 @@ The   International Journal of Ideation in Science and Technology (IJIST) focuse
     <div>
       <h3 className="font-semibold text-blue-700 mb-1">Legal Compliance & Security</h3>
       <p>
-        IJIST adheres to all applicable data protection regulations. We implement strict security protocols to safeguard personal data and ensure users’ rights are respected in accordance with international standards.
+        IJRWS adheres to all applicable data protection regulations. We implement strict security protocols to safeguard personal data and ensure users’ rights are respected in accordance with international standards.
       </p>
     </div>
   </div>

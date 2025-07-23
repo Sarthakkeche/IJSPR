@@ -88,7 +88,7 @@ const Footer = () => {
 
       {/* Footer Bottom */}
       <div className="border-t border-gray-800 mt-12 pt-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} IJIST Journal. All rights reserved.
+        © {new Date().getFullYear()} IJRWS Journal. All rights reserved.
       </div>
     </footer>
   );

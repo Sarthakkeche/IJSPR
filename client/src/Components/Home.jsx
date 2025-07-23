@@ -131,7 +131,7 @@ const stats = [
         >
           <div className="max-w-5xl mx-auto text-white font-playfair py-8">
             <h1 className="text-3xl md:text-5xl font-bold drop-shadow-lg">
-             International Journal of Ideation in Science and Technology
+             International journal of Research welfare society
             </h1>
             <p className="mt-4 text-sm md:text-lg font-medium text-gray-300">
              An  peer-reviewed, open-access journal that aims to publish original, high-quality research across a wide range of scientific disciplines.It provides a professional platform for innovative studies that advance global scientific knowledge, with key focus areas including Pharmaceutical Sciences, Life Sciences, Health Sciences, Engineering, and related fields.
@@ -206,7 +206,7 @@ const stats = [
     Who We Are
   </h2>
   <p className="text-gray-700 text-lg mb-6">
-    <strong>The   International Journal of Ideation in Science and Technology(IJIST)</strong> is a new, open-access platform designed to support researchers, students, and professionals in publishing original work. We aim to simplify the publication process and provide a global stage for fresh ideas and discoveries.
+    <strong>The   International journal of Research welfare society (IJRWS)</strong> is a new, open-access platform designed to support researchers, students, and professionals in publishing original work. We aim to simplify the publication process and provide a global stage for fresh ideas and discoveries.
   </p>
 
   <ul className="space-y-4">
