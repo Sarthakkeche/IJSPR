@@ -60,7 +60,7 @@ const Footer = () => {
           <h4 className="text-orange-500 font-semibold text-sm mb-4">Contact Us</h4>
           <p className="flex items-center space-x-2 text-sm mb-2">
             <Mail className="w-4 h-4 text-orange-400" />
-            <span>editorijsrijournal@gmail.com</span>
+            <span>editorijrwsjournal@gmail.com</span>
           </p>
           <p className="flex items-center space-x-2 text-sm mb-2">
             <Phone className="w-4 h-4 text-orange-400" />

@@ -96,7 +96,7 @@ General Formatting:  </p>
 
           <div>
             <h2 className="text-2xl font-bold text-orange-500 mb-4">6. Submission Process</h2>
-            <p>Submit the manuscript electronically to the journal's email addresses:  <a href="mailto:editorijsrijournal@gmail.com" className="text-blue-600 underline">editorijsrijournal@gmail.com</a>.Ensure that the manuscript has not been previously published or is under consideration elsewhere. Include a cover letter that briefly describes the significance of the work and confirms that all authors agree with the submission.</p>
+            <p>Submit the manuscript electronically to the journal's email addresses:  <a href="mailto:editorijrwsjournal@gmail.com" className="text-blue-600 underline">editorijrwsjournal@gmail.com</a>.Ensure that the manuscript has not been previously published or is under consideration elsewhere. Include a cover letter that briefly describes the significance of the work and confirms that all authors agree with the submission.</p>
           </div>
 
           <div>

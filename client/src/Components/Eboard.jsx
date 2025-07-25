@@ -55,7 +55,7 @@ const members = [
     title: "M. Pharma, Ph.D.",
     position: "Associate Professor & Head, Dept. of Pharmacognosy",
     institute: "Rajarshi Shahu College of Pharmacy, Buldana",
-    email: "editorijsrijournal@gmail.com",
+    email: "editorijrwsjournal@gmail.com",
     image: Kewatkar,
   },{
     role: "Senior Editorial Member",
@@ -105,7 +105,7 @@ const members = [
     title: "M. Pharm, Ph.D.(Pursuing)",
     position: "Associate Professor, Department of Pharmacology  ",
     institute: "GH Raisoni University, Saikheda 480337 Madhya Pradesh",
-    email: "editorijsrijournal@gmail.com",
+    email: "editorijrwsjournal@gmail.com",
     image: deepika,
   },
   {  role: "	Associate Editorial Members ",
@@ -114,7 +114,7 @@ const members = [
     
     
    // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
-    email: "editorijsrijournal@gmail.com",
+    email: "editorijrwsjournal@gmail.com",
     image: sakshi,
   },
  {  role: "	Associate Editorial Members ",
@@ -122,7 +122,7 @@ const members = [
     title: "M Pharmacy in pharmacology ",
     
    // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
-     email: "editorijsrijournal@gmail.com",
+     email: "editorijrwsjournal@gmail.com",
     image: jaya,
   },
   {    role: "	Associate Editorial Members ",
@@ -130,7 +130,7 @@ const members = [
     title: "M Pharmacy in pharmacology ",
     
    // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
-    email: "editorijsrijournal@gmail.com",
+    email: "editorijrwsjournal@gmail.com",
     image: priyanka,
   },
 ];

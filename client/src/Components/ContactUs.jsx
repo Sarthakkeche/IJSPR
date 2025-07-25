@@ -77,7 +77,7 @@ const ContactUsContent = () => {
           {
             icon: "📧",
             title: "Email",
-            value: "editorijsrijournal@gmail.com",
+            value: "editorijrwsjournal@gmail.com",
           },
           {
             icon: "📍",

@@ -50,8 +50,8 @@ const InfoAuthors = () => {
               <a href="https://www.ijsri.org" className="text-blue-600 underline">
                 www.IJRWS.com
               </a>. The e-mail ID is{" "}
-              <a href="mailto:editorijsrijournal@gmail.com" className="text-blue-600 underline">
-                editorijsrijournal@gmail.com
+              <a href="mailto:editorijrwsjournal@gmail.com" className="text-blue-600 underline">
+                editorijrwsjournal@gmail.com
               </a>.
             </p>
           </div>
