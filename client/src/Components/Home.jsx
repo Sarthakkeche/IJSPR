@@ -131,7 +131,7 @@ const stats = [
         >
           <div className="max-w-5xl mx-auto text-white font-playfair py-8">
             <h1 className="text-3xl md:text-5xl font-bold drop-shadow-lg">
-             International journal of Research welfare society
+             International Journal of Research Welfare Society
             </h1>
             <p className="mt-4 text-sm md:text-lg font-medium text-gray-300">
              An  peer-reviewed, open-access journal that aims to publish original, high-quality research across a wide range of scientific disciplines.It provides a professional platform for innovative studies that advance global scientific knowledge, with key focus areas including Pharmaceutical Sciences, Life Sciences, Health Sciences, Engineering, and related fields.
@@ -143,7 +143,7 @@ const stats = [
 
             <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
               <a
-                href="mailto:iccss@dypcoeakurdi.ac.in?"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header"
                 className="px-6 py-2 bg-orange-500 hover:bg-red-500 rounded-full text-sm md:text-lg font-semibold transition-all duration-300"
               >
                 Submit Paper

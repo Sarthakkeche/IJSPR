@@ -57,7 +57,7 @@ const Navbar = () => {
     "contact": "/contact",
     "editorial board": "/Eboard",
     "guidelines": "/subguide",
-    "submit paper": "/submit",
+    "submit paper": "https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header",
     "archives": "/archives",
   };
 
@@ -149,7 +149,7 @@ const Navbar = () => {
       />
     </div>
         <button className="bg-orange-500 px-5 py-2 rounded-full text-white font-medium hover:bg-orange-600 transition">
-          Submit Manuscript
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header">  Submit Manuscript</a>
         </button>
       </div>
 
