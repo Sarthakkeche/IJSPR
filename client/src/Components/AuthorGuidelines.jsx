@@ -51,7 +51,12 @@ const GuidelinesContent = () => {
       <b>Short Communications:</b> Brief reports on significant findings that warrant rapid dissemination.
     </li>
     <li>
-      <b>Review Articles:</b> Summaries of existing literature on a specific topic, providing insights and future directions.
+      <b>Review Articles:</b> These are comprehensive summaries of existing literature on a specific topic, offering insights, critical analysis, and suggestions for future research directions. Review articles are generally categorized into two types:
+      <br></br>
+
+Mini-Reviews: Concise overviews typically spanning 7–8 pages, focusing on a narrower aspect of a topic with a limited number of references.
+<br></br>
+Major Reviews: Extensive and in-depth discussions usually exceeding 15 pages, incorporating more than 100 references, and providing a broad and detailed analysis of the literature.
     </li>
     <li>
       <b>Case Studies:</b> Detailed analyses of specific instances or phenomena, highlighting unique aspects or lessons learned.
@@ -73,7 +78,7 @@ General Formatting:  </p>
           <div>
             <h2 className="text-2xl font-bold text-orange-500 mb-4">3. Title and Abstract</h2>
             <p><b>Title:</b> The title should be concise and informative, with a maximum of 150 characters</p>
-            <p><b>Abstract:</b> An abstract of no more than 250 words should summarize the research purpose, methods, significant results, and conclusions without citations.</p>
+            <p><b>Abstract:</b> An abstract of no more than 250 words should summarize the research purpose, methods, significant results, and conclusions without citations. In addition to the written abstract, a graphical abstract may also be required to visually communicate the key findings or the central concept of the study, allowing readers to quickly grasp the main message of the research.</p>
             <p><b>Keywords:</b> Provide 4–6 relevant keywords.</p>
           </div>
 

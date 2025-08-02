@@ -79,7 +79,7 @@ The language of presentation for all papers is English. Please type each manuscr
             <ol className="list-decimal list-inside space-y-3">
               <li><b>Covering Letter:</b> In addition to the general details (name, address, contact details including mobile number of the corresponding author), it should mention in brief what is already known about this subject and what new is added by the submitted work.</li>
               <li><b>Title Page:</b> Essential information should be clearly given on the title page. The title of the document ought to be written in bold, title case, and with a font size of 14. The authors' names should be in uppercase, regular face, and font size 12. The affiliations of the writers should be listed in lowercase, regular face. An asterisk should be used to denote the corresponding author. The title need to be brief and appropriately convey the essence of the work being conveyed. Initials and surnames should be used when listing authors. Please include the words "*Address for Correspondence" and a working email address in the lower left corner of the title page. The address of the corresponding author should be noted separately if it deviates from the affiliations already given. We can guarantee the manuscript's information is communicated clearly and effectively by following certain formatting requirements. Please make sure the title page is prepared accurately and completely.</li>
-              <li><b>Abstract:</b> It must begin with the following information on a new page. Type it in single-space format to distinguish it from the introduction. Since many databases only list abstracts, the abstract is particularly crucial as it provides a succinct synopsis of the study. A concise summary of all the important facets of the research should be included in the abstract, which should be between 150 and 250 words long. Creating a thorough abstract enables readers to rapidly understand the manuscript's main ideas.</li>
+              <li><b>Abstract:</b>  In addition to the written abstract, a graphical abstract may be required to visually represent the core findings or methodology of the study, providing readers with a quick and intuitive understanding of the research. The abstract must begin on a new page and be typed in single-space format to distinguish it from the introduction. Since many databases only list abstracts, it is particularly crucial as it provides a succinct synopsis of the study. A concise summary of all the important facets of the research should be included in the abstract, which should be between 150 and 250 words long. Creating a thorough abstract enables readers to rapidly understand the manuscript's main ideas.</li>
               <li><b>Keywords:</b> Please add four to six pertinent keywords after the abstract. The primary concepts or subjects covered in the essay should be appropriately represented by these keywords. Selecting relevant keywords makes it easier for the article to be effectively indexed and searched, making it simple for readers to find and get the information they're looking for.</li>
               <li><b>Introduction:</b> It ought to begin on a fresh page. In essence, this section has to present the topic and provide a brief explanation of how the study idea came to be. Provide a brief overview of the study's history. Provide the most recent research that directly affects the topic rather than conducting a thorough literature study. Research aims and objectives must be justified in a clear and unambiguous manner. The study's goal ought to be mentioned in the conclusion. Furthermore, explicitly outline the research's objectives, emphasizing the precise goals and objectives that the study seeks to accomplish. Readers can understand the goal and inspiration of the research by reading an introduction that is straightforward and concise.
 
@@ -94,9 +94,74 @@ The language of presentation for all papers is English. Please type each manuscr
           {/* (B) Review Articles */}
           <div>
             <h3 className="text-xl font-bold text-orange-400 mt-4 mb-2">(B) Review Articles</h3>
-            <p>A cover letter, title page, summary (which need not be structured), and key words should all be included in these pieces. They ought to be composed under the proper subheadings. For improved presentation, the authors are urged to make use of flowcharts, boxes, cartoons, tables, and figures. Below are some further details.
-
-
+            <p>
+Review articles serve as critical syntheses of existing knowledge on a defined subject area, offering readers a coherent, comprehensive, and balanced overview of current trends, significant developments, and emerging directions in the field. Submissions are expected to be well-structured, analytical, and enriched with relevant visual and conceptual aids that enhance clarity and engagement.
+<br></br>
+Submission Components
+All review article submissions must include the following elements:
+<br></br>
+Cover Letter
+A formal letter addressed to the Editor, outlining the scope, significance, and novelty of the review, along with any pertinent author background or declarations.
+<br></br>
+Title Page
+This should include:
+<br></br>
+The full title of the manuscript
+<br></br>
+Full names and institutional affiliations of all contributing authors
+<br></br>
+Designation of the corresponding author, with complete contact information
+<br></br>
+Abstract (Summary)
+A succinct, non-structured abstract (approximately 200–300 words) summarizing the core objectives, main themes, and overall contribution of the review.
+<br></br>
+Keywords
+Include 4–6 keywords that accurately reflect the content and scope of the review for indexing and discoverability purposes.
+<br></br>
+Manuscript Structure
+Manuscripts should be organized under appropriate and clearly labeled subheadings. Authors are encouraged to present content in a logical and engaging manner, incorporating critical analysis and synthesis throughout. A typical structure may include:
+<br></br>
+Introduction
+<br></br>
+Background or Theoretical Context
+<br></br>
+Core Themes and Discussion
+<br></br>
+Current Advances and Developments
+<br></br>
+Challenges, Gaps, and Controversies
+<br></br>
+Future Perspectives
+<br></br>
+Conclusion
+<br></br>
+Use of Visual and Structural Enhancements
+To optimize presentation and reader engagement, authors are strongly encouraged to integrate visual and structural elements where appropriate, such as:
+<br></br>
+Conceptual flowcharts and process diagrams
+<br></br>
+Highlight boxes for definitions, summaries, or key points
+<br></br>
+Informative tables and high-quality figures
+<br></br>
+Illustrative cartoons or schematics, where contextually appropriate
+<br></br>
+Categories of Review Articles
+Review submissions are categorized into two formats, based on scope and depth:
+<br></br>
+1. Mini-Review
+Length: Approximately 7–8 typeset pages
+<br></br>
+References: Typically up to 50 citations
+<br></br>
+Scope: A focused, concise examination of a narrowly defined topic or recent advancement
+<br></br>
+2. Major Review
+Length: 15 or more typeset pages
+<br></br>
+References: Typically exceeding 100 citations
+<br></br>
+Scope: A comprehensive and in-depth synthesis of a broad, multifaceted topic area
 </p>
           </div>
 
