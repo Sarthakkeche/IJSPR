@@ -23,7 +23,7 @@ const Navbar = () => {
       ],
     },
     // { name: "Issue", to: "/issue" },
-    { name: "Tools For Author", to: "/tools" },
+   // { name: "Tools For Author", to: "/tools" },
     // {
     //   name: "Blogs",
     //   dropdown: [

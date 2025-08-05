@@ -13,7 +13,7 @@ const InfoAuthors = () => {
 
 
   return (
-    <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
+    <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800 text-justify">
       <Navbar />
 
       {/* Hero Section */}
@@ -74,7 +74,7 @@ The language of presentation for all papers is English. Please type each manuscr
           </div>
 
           {/* (A) Original Research Articles */}
-          <div>
+          <div className="text-justify">
             <h3 className="text-xl font-bold text-orange-400 mt-4 mb-2">(A) Original Research Articles</h3>
             <ol className="list-decimal list-inside space-y-3">
               <li><b>Covering Letter:</b> In addition to the general details (name, address, contact details including mobile number of the corresponding author), it should mention in brief what is already known about this subject and what new is added by the submitted work.</li>

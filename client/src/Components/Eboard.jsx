@@ -20,8 +20,18 @@ import priyanka from "../assets/priyanka.jpg";
 import deepika from "../assets/ved.jpg";
 import jawarkar from "../assets/rode.jpg";
 import ming from "../assets/ming.jpg";
+import pawan from "../assets/pawan.jpg";
 
 const members = [
+  {
+    role: "Editor-in-Chief",
+    name: "Dr Pawan Tekade",
+    title: "MBBS, MD (FORENSIC MEDICINE)",
+    position: "Professor and Head ,Department of Forensic Medicine and Toxicology",
+    institute: "Dr Panjabrao alias Bhausaheb Deshmukh Memorial Medical College, Amravati.",
+    //email: "https://www.dbcop.org/member-detail.php?id=47",
+    image: pawan,
+  },
   {
     role: "Editor-in-Chief",
     name: "Dr. Ritesh A. Fule",
@@ -149,7 +159,8 @@ const EditorialBoard = () => {
   const renderMembers = (list) =>
     list.map((member, index) => (
       <motion.div
-        key={member.name}
+        key={`${member.name}-${index}`}
+
         className="flex flex-col md:flex-row items-center bg-white shadow-md rounded-lg p-5 hover:shadow-xl transition-all duration-300 border-l-4 border-orange-500"
         initial={{ opacity: 0, x: -50 }}
         whileInView={{ opacity: 1, x: 0 }}
