@@ -32,14 +32,14 @@ const members = [
     //email: "https://www.dbcop.org/member-detail.php?id=47",
     image: pawan,
   },
-  {
+    {
     role: "Editor-in-Chief",
-    name: "Dr. Ritesh A. Fule",
-    title: "M. Pharm., PhD Tech in Pharmaceutics",
-    position: "Associate Professor, Department of Pharmaceutics",
-    institute: "Dadasaheb Balpande College of Pharmacy, Nagpur",
-    email: "https://www.dbcop.org/member-detail.php?id=47",
-    image: fule,
+    name: "Professor Long Chiau Ming",
+    // title: "Sir Jeffrey Cheah Sunway Medical School Faculty of Medical and Life Sciences",
+    position: "Deputy Dean (Research and Sustainability)ProfessorDepartment of Biomedical Sciences",
+    institute: "Sir Jeffrey Cheah Sunway Medical School Faculty of Medical and Life Sciences",
+    email: "https://sunwayuniversity.edu.my/sir-jeffrey-cheah-sunway-medical-school/staff-profiles/professor-long-chiau-ming",
+    image: ming,
   },
     {
        role: "Editor-in-Chief",
@@ -50,14 +50,15 @@ const members = [
     email: "https://vbcop.org/faculty.php",
     image: vivek,
   },
+
   {
     role: "Editor-in-Chief",
-    name: "Professor Long Chiau Ming",
-    // title: "Sir Jeffrey Cheah Sunway Medical School Faculty of Medical and Life Sciences",
-    position: "Deputy Dean (Research and Sustainability)ProfessorDepartment of Biomedical Sciences",
-    institute: "Sir Jeffrey Cheah Sunway Medical School Faculty of Medical and Life Sciences",
-    email: "https://sunwayuniversity.edu.my/sir-jeffrey-cheah-sunway-medical-school/staff-profiles/professor-long-chiau-ming",
-    image: ming,
+    name: "Dr. Ritesh A. Fule",
+    title: "M. Pharm., PhD Tech in Pharmaceutics",
+    position: "Associate Professor, Department of Pharmaceutics",
+    institute: "Dadasaheb Balpande College of Pharmacy, Nagpur",
+    email: "https://www.dbcop.org/member-detail.php?id=47",
+    image: fule,
   },
    {
     role: "Senior Editorial Member",
