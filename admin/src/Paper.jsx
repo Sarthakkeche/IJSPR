@@ -19,7 +19,7 @@ const PaperManagement = () => {
 
   const fetchPapers = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/papers/${id}`);
+      const res = await axios.get(`https://ijspr.onrender.com/api/papers/${id}`);
       setPapers(res.data);
     } catch (err) {
       setError("Failed to load papers.");
@@ -37,7 +37,7 @@ const PaperManagement = () => {
     formData.append('file', file);
 
     try {
-      await axios.post(`http://localhost:5000/api/papers/${id}`, formData);
+      await axios.post(`https://ijspr.onrender.com/api/papers/${id}`, formData);
       setTitle('');
       setAuthor('');
       setDate('');
@@ -119,7 +119,7 @@ const PaperManagement = () => {
                 >
                   <span className="text-lg font-medium text-slate-200">{p.title}</span>
                   <a
-                    href={`http://localhost:5000${p.fileUrl}`}
+                    href={`https://ijspr.onrender.com${p.fileUrl}`}
                     target="_blank"
                     rel="noreferrer"
                     download
