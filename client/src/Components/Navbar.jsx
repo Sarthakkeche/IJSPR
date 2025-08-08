@@ -22,7 +22,14 @@ const Navbar = () => {
         { name: "Ethics", to: "/ethics" },
       ],
     },
-    // { name: "Issue", to: "/issue" },
+    {
+      name: "Issue",
+      dropdown: [
+        { name: "Current issue", to: "/currentpage" },
+          { name: "Archive", to: "/archive" },
+        
+      ],
+    },
    // { name: "Tools For Author", to: "/tools" },
     // {
     //   name: "Blogs",

@@ -5,7 +5,9 @@ import ContactUsContent  from "./Components/ContactUs";
 import EditorialBoard from "./Components/Eboard";
 import GuidelinesContent from "./Components/AuthorGuidelines";
 import InfoAuthors from "./Components/InfoAuthor";
-import ScrollToTop from "./ScrollToTop";
+import ArchivePage from "./Components/Archive";
+import CurrentIssuePage from "./Components/Issue";
+import PaperPage from "./Components/PagePaper";
 
 const RoutesConfig = () => {
   return useRoutes([
@@ -19,6 +21,10 @@ const RoutesConfig = () => {
     {
       path:"/InfoAuthors",element:<InfoAuthors/>
     },
+    {path:"/archive" , element:<ArchivePage/>},
+    {path:"/currentpage" , element:<CurrentIssuePage/>
+    },
+    {path:"/paper/:issueId" , element:<PaperPage/>},
     
     
 
