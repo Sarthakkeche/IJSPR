@@ -10,12 +10,12 @@ const ArchivePage = () => {
 
   useEffect(() => {
     // Fetch volumes
-    axios.get("http://localhost:5000/api/volumes")
+    axios.get("https://ijspr.onrender.com/api/volumes")
       .then(res => setVolumes(res.data))
       .catch(err => console.log("Error loading volumes:", err));
 
     // Fetch issues
-    axios.get("http://localhost:5000/api/issues")
+    axios.get("https://ijspr.onrender.com/api/issues")
       .then(res => setIssues(res.data))
       .catch(err => console.log("Error loading issues:", err));
   }, []);

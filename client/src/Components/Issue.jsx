@@ -9,7 +9,7 @@ const CurrentIssuePage = () => {
   useEffect(() => {
     const fetchLatestPapers = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/papers/latest');
+        const res = await axios.get('https://ijspr.onrender.com/api/papers/latest');
         setPapers(res.data);
       } catch (err) {
         console.error('Error fetching latest papers:', err);
@@ -39,7 +39,7 @@ const CurrentIssuePage = () => {
                 <p className="text-sm text-gray-600 mb-2">{paper.Author || "Unknown Author"}</p>
                 <p className="text-sm text-gray-700 mb-3">{paper.Date || "Date not provided"}</p>
                 <a
-                  href={`http://localhost:5000${paper.fileUrl}`}
+                  href={`https://ijspr.onrender.com${paper.fileUrl}`}
                   className="inline-block mt-auto bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                   target="_blank"
                   rel="noopener noreferrer"
