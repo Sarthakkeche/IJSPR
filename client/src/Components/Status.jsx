@@ -4,8 +4,14 @@ import "aos/dist/aos.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import axios from "axios";
-import statusImg from "../assets/status.webp"; // illustration for status page
-import checkBg from "../assets/checkbg.jpg"; // background image
+import statusImg from "../assets/status.webp";
+import checkBg from "../assets/checkbg.jpg";
+
+// ✅ API base URL config
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://ijspr-backend.onrender.com"
+    : "http://localhost:5000";
 
 const CheckStatusPage = () => {
   useEffect(() => {
@@ -17,12 +23,13 @@ const CheckStatusPage = () => {
 
   const handleCheck = async (e) => {
     e.preventDefault();
-    setStatus("Checking...");
+    setStatus("⏳ Checking...");
     try {
-      const res = await axios.get(`http://localhost:5000/api/manuscripts/status/${code}`);
+      const res = await axios.get(`${API_BASE_URL}/api/papers/status/${code}`);
       setStatus(`📌 Status: ${res.data.status}`);
     } catch (error) {
-      setStatus("❌ Error checking status.");
+      console.error("❌ Error fetching status:", error);
+      setStatus("❌ Error checking status. Please try again.");
     }
   };
 
@@ -57,7 +64,9 @@ const CheckStatusPage = () => {
             <h2 className="text-3xl font-bold text-blue-800">Track Your Paper</h2>
 
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">Unique Code</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Unique Code
+              </label>
               <input
                 type="text"
                 value={code}
@@ -75,7 +84,7 @@ const CheckStatusPage = () => {
               Check Status
             </button>
 
-            <p className="text-sm text-gray-600 mt-2">{status}</p>
+            {status && <p className="text-sm text-gray-700 mt-2">{status}</p>}
           </form>
 
           <img
