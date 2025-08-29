@@ -1,76 +1,4 @@
-// import express from "express";
-// import cors from "cors";
-// import nodemailer from "nodemailer";
-// import dotenv from "dotenv";
 
-// const app = express();
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   "https://ijspr-sarthakkeches-projects.vercel.app"
-// ];
-// app.use(cors({
-//   origin: "*", // allow any frontend
-//   methods: ["GET", "POST"],
-//   credentials: true
-// }));
-// const PORT = process.env.PORT || 5000;
-
-// // Middleware
-// app.use(express.json());
-
-
-// // ⚡ Allow all origins (CORS for deployment)
-
-
-
-// dotenv.config();
-// // POST route to send mail
-// app.post("/send", async (req, res) => {
-//   const { name, email, message } = req.body;
-
-//   try {
-//     // Transporter configuration
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: process.env.EMAIL_USER,      // ✅ Environment variable for your Gmail
-//         pass: process.env.EMAIL_PASS,      // ✅ Environment variable for your app password
-//       },
-//     });
-
-//     // Email details
-//     const mailOptions = {
-//       from: `"${name}" <${email}>`,
-//       to: process.env.EMAIL_USER, // ✅ Receiver email (your Gmail)
-//       subject: `New message from ${name}`,
-//       html: `
-//         <h3>Contact Form Submission</h3>
-//         <p><strong>Name:</strong> ${name}</p>
-//         <p><strong>Email:</strong> ${email}</p>
-//         <p><strong>Message:</strong></p>
-//         <p>${message}</p>
-//       `,
-//     };
-
-//     // Send mail
-//     await transporter.sendMail(mailOptions);
-
-//     res.status(200).json("Your message has been sent successfully!");
-//   } catch (error) {
-//     console.error("❌ Error sending mail:", error);
-//     res.status(500).json("Failed to send message. Please try again later.");
-//   }
-// });
-
-// // Root route for testing
-// app.get("/", (req, res) => {
-//   res.send("✅ Mail server is running!");
-// });
-
-// // Start server
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server running on port ${PORT}`);
-// });
 import express from "express";
 import cors from "cors";
 import nodemailer from "nodemailer";
@@ -114,8 +42,9 @@ const paperSchema = new mongoose.Schema({
   Author: { type: String }, // ✅ Include Author field
   Date: { type: String },   // ✅ Include Date field
   fileUrl: { type: String, required: true },
-  issueId: { type: mongoose.Schema.Types.ObjectId, ref: 'Issue', required: true }
-},{ timestamps: true });
+  issueId: { type: mongoose.Schema.Types.ObjectId, ref: 'Issue', required: true },
+ uniqueCode: { type: String, index: true } // keep non-unique in case of legacy data
+}, { timestamps: true });
 const Paper = mongoose.model("Paper", paperSchema);
 
 // ✅ Multer setup
@@ -185,7 +114,8 @@ app.post("/api/papers/:issueId", upload.single('file'), async (req, res) => {
     Author:req.body.Author,
     Date:req.body.Date,
     fileUrl: `/uploads/${req.file.filename}`,
-    issueId: req.params.issueId
+    issueId: req.params.issueId,
+     uniqueCode: req.body.uniqueCode
   });
   await paper.save();
   res.json(paper);
@@ -262,4 +192,110 @@ app.get("/", (req, res) => {
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+
+
+///////status and the submit backend
+
+
+// =================== Manuscript Submission Schema ===================
+const manuscriptSchema = new mongoose.Schema({
+  authorName: { type: String, required: true },
+  paperTitle: { type: String, required: true },
+  paperFile: { type: String, required: true }, // file path
+  uniqueCode: { type: String, required: true, unique: true }
+}, { timestamps: true });
+
+const Manuscript = mongoose.model("Manuscript", manuscriptSchema);
+
+// =================== Multer for Manuscripts ===================
+const manuscriptStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = Date.now() + ext;
+    cb(null, filename);
+  }
+});
+const manuscriptUpload = multer({ storage: manuscriptStorage });
+
+// =================== Routes ===================
+
+// Submit Manuscript
+app.post("/api/manuscripts/submit", manuscriptUpload.single("paperfile"), async (req, res) => {
+  try {
+    const { authorName, paperTitle } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Paper file is required" });
+    }
+
+    // Generate unique tracking code
+    const uniqueCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    const manuscript = new Manuscript({
+      authorName,
+      paperTitle,
+      paperFile: `/uploads/${req.file.filename}`,
+      uniqueCode
+    });
+
+    await manuscript.save();
+
+    res.json({
+      success: true,
+      message: "✅ Manuscript submitted successfully",
+      uniqueCode
+    });
+  } catch (error) {
+    console.error("❌ Manuscript submission error:", error);
+    res.status(500).json({ success: false, message: "Failed to submit manuscript" });
+  }
+});
+
+// Check Manuscript Status
+app.get("/api/papers/status/:code", async (req, res) => {
+  try {
+    const paper = await Paper.findOne({ uniqueCode: req.params.code })
+      .populate({
+        path: "issueId",
+        select: "name volumeId",
+        populate: { path: "volumeId", model: "Volume", select: "name" }
+      });
+
+    if (paper) {
+      return res.json({
+        status: "Completed",
+        paper: {
+          title: paper.title,
+          author: paper.Author,
+          fileUrl: paper.fileUrl,
+          issue: paper.issueId?.name || null,
+          volume: paper.issueId?.volumeId?.name || null,
+          uniqueCode: paper.uniqueCode,
+          publishedAt: paper.createdAt
+        }
+      });
+    }
+
+    // Not published under Papers yet → Pending
+    return res.json({
+      status: "Pending",
+      message: "Your paper has not been published yet."
+    });
+  } catch (error) {
+    console.error("❌ Status check error:", error);
+    res.status(500).json({ status: "Error", message: "Server error" });
+  }
+});
+
+// Get all Manuscripts (for Admin Panel)
+app.get("/api/manuscripts", async (req, res) => {
+  try {
+    const manuscripts = await Manuscript.find().sort({ createdAt: -1 });
+    res.json(manuscripts);
+  } catch (error) {
+    console.error("❌ Fetch manuscripts error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });

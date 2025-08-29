@@ -19,7 +19,7 @@ const Navbar = () => {
       dropdown: [
         { name: "Submission Guidelines", to: "/subguide" },
           { name: "Information for Author", to: "/InfoAuthors" },
-        { name: "Ethics", to: "/ethics" },
+        { name: "Ethics", to: "/status" },
       ],
     },
     {
@@ -64,7 +64,8 @@ const Navbar = () => {
     "contact": "/contact",
     "editorial board": "/Eboard",
     "guidelines": "/subguide",
-    "submit paper": "https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header",
+    // "submit paper": "https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header",
+    "submit paper":"/submit",
     "archives": "/archives",
   };
 
@@ -156,10 +157,10 @@ const Navbar = () => {
       />
     </div>
         <button className="bg-orange-500 px-5 py-2 rounded-full text-white font-medium hover:bg-orange-600 transition">
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header">  Submit Manuscript</a>
+        <a href="/submit">  Submit Manuscript</a>
         </button>
       </div>
-
+{/* https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header */}
       {/* Mobile Nav */}
       {menuOpen && (
         <div className="md:hidden bg-white shadow px-4 pb-4 space-y-2">

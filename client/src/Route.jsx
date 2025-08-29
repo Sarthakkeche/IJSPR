@@ -8,6 +8,8 @@ import InfoAuthors from "./Components/InfoAuthor";
 import ArchivePage from "./Components/Archive";
 import CurrentIssuePage from "./Components/Issue";
 import PaperPage from "./Components/PagePaper";
+import SubmitManuscriptPage from "./Components/Submit";
+import CheckStatusPage from "./Components/Status";
 
 const RoutesConfig = () => {
   return useRoutes([
@@ -17,6 +19,12 @@ const RoutesConfig = () => {
     {path:"/Eboard",element:<EditorialBoard/>},
     {
       path:"/subguide",element:<GuidelinesContent/>
+    },
+    {
+      path:"/submit" , element:<SubmitManuscriptPage/>
+    },
+    {
+      path:"/status" , element:<CheckStatusPage/>
     },
     {
       path:"/InfoAuthors",element:<InfoAuthors/>

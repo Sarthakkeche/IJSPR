@@ -11,6 +11,12 @@ export default function AdminPanel() {
         </Link>
         
       </div>
+      <div className="flex justify-center">
+        <Link to="/Pending" className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
+          pending Paper
+        </Link>
+        
+      </div>
     </div>
   );
 }

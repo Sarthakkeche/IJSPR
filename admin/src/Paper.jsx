@@ -12,6 +12,8 @@ const PaperManagement = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [uniqueCode, setUniqueCode] = useState('');
+
 
   useEffect(() => {
     fetchPapers();
@@ -35,12 +37,14 @@ const PaperManagement = () => {
     formData.append('Author',Author);
     formData.append('Date',Date);
     formData.append('file', file);
+     formData.append('uniqueCode', uniqueCode);
 
     try {
       await axios.post(`https://ijspr.onrender.com/api/papers/${id}`, formData);
       setTitle('');
       setAuthor('');
       setDate('');
+       setUniqueCode('');
       setFile(null);
       fetchPapers();
     } catch (err) {
@@ -83,6 +87,13 @@ const PaperManagement = () => {
             onChange={e => setFile(e.target.files[0])}
             className="px-3 py-3 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 cursor-pointer focus:outline-none"
           />
+          <input
+  value={uniqueCode}
+  onChange={e => setUniqueCode(e.target.value)}
+  placeholder="Unique Code (from manuscript)"
+  className="flex-grow px-5 py-3 bg-slate-800 border border-slate-700 rounded-lg shadow-inner placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-300"
+/>
+
           <button
             onClick={uploadPaper}
             className="flex items-center gap-2 bg-pink-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-pink-500/20 disabled:bg-gray-500 disabled:cursor-not-allowed"
