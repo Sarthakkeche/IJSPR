@@ -290,12 +290,54 @@ app.get("/api/papers/status/:code", async (req, res) => {
 });
 
 // Get all Manuscripts (for Admin Panel)
+// ======= ALL manuscripts (unchanged) =======
 app.get("/api/manuscripts", async (req, res) => {
   try {
     const manuscripts = await Manuscript.find().sort({ createdAt: -1 });
-    res.json(manuscripts);
+    return res.json(manuscripts);
   } catch (error) {
     console.error("❌ Fetch manuscripts error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
+
+// ======= PENDING manuscripts (manuscripts NOT yet published in Paper) =======
+app.get("/api/manuscripts/pending", async (req, res) => {
+  try {
+    // get list of uniqueCodes that are already published in Paper
+    const publishedCodes = await Paper.find().distinct("uniqueCode");
+
+    // manuscripts whose uniqueCode is NOT in publishedCodes
+    const pending = await Manuscript.find({
+      uniqueCode: { $nin: publishedCodes.length ? publishedCodes : ["__NO_CODES__"] }
+    }).sort({ createdAt: -1 });
+
+    return res.json(pending);
+  } catch (error) {
+    console.error("❌ Fetch pending manuscripts error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ======= Debug route to help see DB state quickly =======
+app.get("/api/manuscripts/debug", async (req, res) => {
+  try {
+    const totalMan = await Manuscript.countDocuments();
+    const totalPapers = await Paper.countDocuments();
+    const publishedCodes = await Paper.find().distinct("uniqueCode");
+    const pendingCount = await Manuscript.countDocuments({
+      uniqueCode: { $nin: publishedCodes.length ? publishedCodes : ["__NO_CODES__"] }
+    });
+
+    return res.json({
+      totalManuscripts: totalMan,
+      totalPublishedPapers: totalPapers,
+      publishedCodesSample: publishedCodes.slice(0, 20),
+      pendingManuscriptsCount: pendingCount
+    });
+  } catch (err) {
+    console.error("❌ Debug error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
