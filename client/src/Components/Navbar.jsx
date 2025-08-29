@@ -19,9 +19,10 @@ const Navbar = () => {
       dropdown: [
         { name: "Submission Guidelines", to: "/subguide" },
           { name: "Information for Author", to: "/InfoAuthors" },
-        { name: "Ethics", to: "/status" },
+        { name: "Format Guidelines", to: "/subguide" },
       ],
     },
+    { name: "Status", to: "/status" },
     {
       name: "Issue",
       dropdown: [
@@ -67,6 +68,7 @@ const Navbar = () => {
     // "submit paper": "https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header",
     "submit paper":"/submit",
     "archives": "/archives",
+    "status":"/status"
   };
 
   const handleSearch = (e) => {

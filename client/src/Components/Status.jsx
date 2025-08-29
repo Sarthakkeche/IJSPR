@@ -4,7 +4,7 @@ import "aos/dist/aos.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import axios from "axios";
-import statusImg from "../assets/status.webp";
+import statusImg from "../assets/status.jpg";
 import checkBg from "../assets/checkbg.jpg";
 
 // ✅ API base URL config
