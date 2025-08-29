@@ -8,10 +8,7 @@ import statusImg from "../assets/status.webp";
 import checkBg from "../assets/checkbg.jpg";
 
 // ✅ API base URL config
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://ijspr-backend.onrender.com"
-    : "http://localhost:5000";
+const API_BASE_URL = "https://ijspr-backend.onrender.com";
 
 const CheckStatusPage = () => {
   useEffect(() => {
