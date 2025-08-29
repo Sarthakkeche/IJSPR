@@ -8,7 +8,7 @@ import statusImg from "../assets/status.webp";
 import checkBg from "../assets/checkbg.jpg";
 
 // ✅ API base URL config
-const API_BASE_URL = "https://ijspr-backend.onrender.com";
+const API_BASE_URL = "https://ijspr.onrender.com";
 
 const CheckStatusPage = () => {
   useEffect(() => {

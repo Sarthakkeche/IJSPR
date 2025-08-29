@@ -33,7 +33,7 @@ const SubmitManuscriptPage = () => {
     data.append("paperfile", paperFile);
 
     try {
-      const res = await axios.post("http://ijspr-backend.onrender/api/manuscripts/submit", data, {
+      const res = await axios.post("http://ijspr.onrender.com/api/manuscripts/submit", data, {
  
 });
 
