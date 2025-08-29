@@ -143,7 +143,7 @@ const stats = [
 
             <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
               <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSdxbgyaKw67_P-SLtto_Gi9qVgv4g3odG9_vxNisnAJVOdFCA/viewform?usp=header"
+                href="/submit"
                 className="px-6 py-2 bg-orange-500 hover:bg-red-500 rounded-full text-sm md:text-lg font-semibold transition-all duration-300"
               >
                 Submit Paper
