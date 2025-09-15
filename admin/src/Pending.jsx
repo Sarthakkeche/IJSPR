@@ -143,7 +143,7 @@ export default function PendingManuscripts() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/manuscripts/pending`);
+       const res = await axios.get("https://ijspr.onrender.com/api/manuscripts/pending");
       setManuscripts(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to load manuscripts:", err);
