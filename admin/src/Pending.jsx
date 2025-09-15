@@ -112,7 +112,7 @@ import { FaFileAlt, FaDownload, FaExclamationTriangle, FaSpinner } from "react-i
 
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "https://ijspr-backend.onrender.com" // <- change to your backend URL in production
+    ? "https://ijspr.onrender.com" // <- change to your backend URL in production
     : "http://localhost:5000";
 
 const isFileKey = (k) => {
