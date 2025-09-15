@@ -45,7 +45,7 @@ const AboutUsContent = () => {
           <div >
             <h2 className="text-2xl font-bold mb-4 text-orange-500">Who We Are</h2>
             <p className="mb-3 text-justify">
-The   International journal of Research welfare society (IJRWS) is a leading peer-reviewed, open-access, multidisciplinary journal dedicated to the publication of high-quality and impactful scholarly works. IJRWS serves as a dynamic global platform for the dissemination of original research, reviews, short communications, case reports, Ethics Forum contributions, Education Forum discussions, and Letters to the Editor.            </p>
+The   International journal of Research welfare society (IJRWS) is a leading peer-reviewed, open-access, multidisciplinary IJRWS dedicated to the publication of high-quality and impactful scholarly works. IJRWS serves as a dynamic global platform for the dissemination of original research, reviews, short communications, case reports, Ethics Forum contributions, Education Forum discussions, and Letters to the Editor.            </p>
             <p className="text-justify">
 The journal is committed to advancing scientific knowledge across a wide range of disciplines, including: Life Sciences, Pharmaceutical Sciences, Health Sciences, Clinical and Biomedical Research, Biotechnology, Chemistry, Environmental Science, Bioinformatics, Public Health, Management Sciences, Engineering and Allied Technologies.             </p>
 <p className="text-justify">

@@ -180,7 +180,7 @@ const SubmitManuscriptPage = () => {
 
     try {
       const res = await axios.post(
-        "https://ijspr-backend.onrender.com/api/manuscripts/submit",
+        "https://ijspr.onrender.com/api/manuscripts/submit",
         data
       );
 
