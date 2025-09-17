@@ -16,10 +16,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: ["https://ijrws.com",
-                         "https://ijrwsadmin.vercel.app",
-                         "http://localhost:5173"], 
-                         methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }));
+const corsOptions = {
+  origin: [
+    "https://ijrws.com",
+    "https://ijrwsadmin.vercel.app",  // NO trailing slash
+    "http://localhost:5173"       // NO trailing slash
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static file serving
 
