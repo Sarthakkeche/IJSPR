@@ -17,8 +17,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({ origin: ["https://ijrws.com",
-                         "https://ijrwsadmin.vercel.app/",
-                         "http://localhost:5173/"], 
+                         "https://ijrwsadmin.vercel.app",
+                         "http://localhost:5173"], 
                          methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static file serving
