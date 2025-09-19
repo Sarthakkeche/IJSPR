@@ -50,7 +50,7 @@ const PagePaper = () => {
                <h3 className="text-lg font-semibold text-center text-gray-700">{paper.Author}</h3>
                 <h4 className="text-lg font-semibold text-center text-gray-700">{paper.Date}</h4>
               <a
-                href={`https://ijspr.onrender.com${paper.fileUrl}`}
+                href={paper.fileUrl}
                 download
                 className="mt-4 bg-blue-500 text-white px-5 py-2 rounded hover:bg-blue-600"
               >

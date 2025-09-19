@@ -10,7 +10,7 @@ import 'aos/dist/aos.css';
 import fule from "../assets/fule.png";
 import Dhoke from "../assets/dhoke.jpg";
 import Kewatkar from "../assets/kewatkar.png";
-import vivek from "../assets/vivek.png";
+import vivek from "../assets/vivek.jpg";
 import trupti from "../assets/trupti.jpg";
 import mujtaba from "../assets/mujtaba.jpg";
 import bhimte from "../assets/bhimte.jpg";
@@ -21,6 +21,9 @@ import deepika from "../assets/ved.jpg";
 import jawarkar from "../assets/rode.jpg";
 import ming from "../assets/ming.jpg";
 import pawan from "../assets/pawan.jpg";
+import akhilesh from "../assets/akhilesh.jpg";
+import amol from "../assets/amol.jpg";
+import chytiana from "../assets/chytiana.jpg";
 
 const members = [
   {
@@ -120,29 +123,28 @@ const members = [
     image: deepika,
   },
   {  role: "	Associate Editorial Members ",
-     name: "Ms. Sakshi Anil Keche ",
-    title: "M Pharmacy in pharmacology ",
+     name: "Chaitanya Kulkarni ",
+    title: "B.Pharma, PGD Clinical Research Bombay College of Pharmacy, Mumbai ",
     
     
-   // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
+    institute: "General Manager- Pharmacovigilance Marksans Pharma Limited Mumbai",
     email: "editorijrwsjournal@gmail.com",
-    image: sakshi,
+    image: chytiana,
   },
  {  role: "	Associate Editorial Members ",
-     name: "Ms. Jaya Gajanan Kirdak  ",
-    title: "M Pharmacy in pharmacology ",
-    
-   // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
+     name: "Mr. Amol H. Ingle  ",
+    title: "M. pharm. (Pharmaceutical &   Medicinal Chemistry) ",
+    institute: "Project Manager, Global Clinical Operations Pune, Maharashtra - 411057",
      email: "editorijrwsjournal@gmail.com",
-    image: jaya,
+    image: amol,
   },
   {    role: "	Associate Editorial Members ",
-     name: "Ms. K. M. Priyanka ",
-    title: "M Pharmacy in pharmacology ",
+     name: "Akhilesh Kahale ",
+    title: "B. Pharm, MHA, MBA University of Houston Clear Lake, Houston, Texas ",
     
-   // institute: "Vidya Bharati College of Pharmacy Amravati , 444602 Maharashtra",
+    institute: "Sr. Manager, AI & Data, Amgen, Thousand Oaks, California",
     email: "editorijrwsjournal@gmail.com",
-    image: priyanka,
+    image: akhilesh,
   },
 ];
 
@@ -237,7 +239,7 @@ const EditorialBoard = () => {
 
         {associate.length > 0 && (
           <>
-            <h3 className="text-2xl font-semibold text-orange-600 mb-4">Technical Assistant  </h3>
+            <h3 className="text-2xl font-semibold text-orange-600 mb-4">Advisory Board </h3>
             <div className="space-y-6 mb-10">{renderMembers(associate)}</div>
           </>
         )}
