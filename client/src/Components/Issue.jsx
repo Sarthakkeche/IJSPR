@@ -39,7 +39,7 @@ const CurrentIssuePage = () => {
                 <p className="text-sm text-gray-600 mb-2">{paper.Author || "Unknown Author"}</p>
                 <p className="text-sm text-gray-700 mb-3">{paper.Date || "Date not provided"}</p>
                 <a
-                  href={`https://ijspr.onrender.com${paper.fileUrl}`}
+                  href={paper.fileUrl}
                   className="inline-block mt-auto bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                   target="_blank"
                   rel="noopener noreferrer"
