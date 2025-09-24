@@ -3,7 +3,7 @@ import React from 'react';
 //import { Button } from "@/components/ui/button";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-
+import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
 import { CheckCircle, ShieldCheck, Rocket, List ,Wallet ,Globe,Layers} from 'lucide-react';
