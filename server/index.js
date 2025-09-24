@@ -274,7 +274,32 @@ app.post("/send", async (req, res) => {
     res.status(500).json("Failed to send message.");
   }
 });
+app.get("/statistics", async (req, res) => {
+  try {
+    // 1. Total Issues
+    const totalIssues = await Issue.countDocuments();
 
+    // 2. Unique Authors
+    const papers = await Paper.find({}, "Author"); // only fetch authors field
+    const authorsSet = new Set();
+
+    papers.forEach(paper => {
+      if (Array.isArray(paper.authors)) {
+        paper.authors.forEach(author => authorsSet.add(author.trim()));
+      }
+    });
+
+    const totalAuthors = authorsSet.size;
+
+    res.json({
+      totalIssues,
+      totalAuthors
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching statistics" });
+  }
+});
 // Root
 app.get("/", (req, res) => res.send("✅ IJRWS backend is running!"));
 

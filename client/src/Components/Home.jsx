@@ -70,9 +70,29 @@ const Home = () => {
 ];
 
 
+ useEffect(() => {
+    axios.get("https://ijspr.onrender.com/api/statistics")
+      .then(res => {
+        const { totalIssues, totalAuthors } = res.data;
+
+        // update stats dynamically
+        setStats(prev =>
+          prev.map(item => {
+            if (item.label === "Issue Released") {
+              return { ...item, value: totalIssues.toString() };
+            }
+            if (item.label === "Authors") {
+              return { ...item, value: totalAuthors.toString() };
+            }
+            return item; // leave other stats as is
+          })
+        );
+      })
+      .catch(err => console.error(err));
+  }, []);
 
 
-const stats = [
+const [stats, setStats] = useState([
   {
     icon: <Trophy size={36} className="text-orange-500" />,
     value: "0",
@@ -93,7 +113,7 @@ const stats = [
     value: "0",
     label: "Reviewers"
   }
-];
+]);
 
   return (
    <>
