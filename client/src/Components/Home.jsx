@@ -18,7 +18,7 @@ import img4 from "../assets/4home.webp";
 import ahome from "../assets/Abouthome.png";
 import bg from "../assets/bg.png";
 import { Trophy, BookMarked, Users, BadgeCheck } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect , useState } from "react";
 import AOS from "aos";
 
   
