@@ -110,7 +110,7 @@ const [stats, setStats] = useState([
   },
   {
     icon: <BadgeCheck size={36} className="text-orange-500" />,
-    value: "0",
+    value: "10",
     label: "Reviewers"
   }
 ]);
