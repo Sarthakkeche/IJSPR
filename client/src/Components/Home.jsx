@@ -71,7 +71,7 @@ const Home = () => {
 
 
  useEffect(() => {
-    axios.get("https://ijspr.onrender.com/api/statistics")
+    axios.get("https://ijspr.onrender.com/statistics")
       .then(res => {
         const { totalIssues, totalAuthors } = res.data;
 
