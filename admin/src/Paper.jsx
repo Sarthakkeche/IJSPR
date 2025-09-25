@@ -130,7 +130,7 @@ const PaperManagement = () => {
                 >
                   <span className="text-lg font-medium text-slate-200">{p.title}</span>
                   <a
-                    href={`https://ijspr.onrender.com${p.fileUrl}`}
+                    href={p.fileUrl}
                     target="_blank"
                     rel="noreferrer"
                     download
