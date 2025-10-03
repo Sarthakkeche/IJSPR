@@ -1,7 +1,12 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" },
-    { "source": "/api/(.*)", "destination": "https://ijspr.onrender.com/api/$1" }
-  
+    { 
+      "source": "/api/(.*)", 
+      "destination": "https://ijspr.onrender.com/api/$1" 
+    },
+    { 
+      "source": "/(.*)", 
+      "destination": "/" 
+    }
   ]
 }
