@@ -307,35 +307,47 @@ app.get("/api/statistics", async (req, res) => {
   }
 });
 
-app.get("/sitemap.xml", async (req, res) => {
+app.get("/api/sitemap.xml", async (req, res) => {
   try {
     const papers = await Paper.find({}, "slug updatedAt");
     const baseUrl = "https://ijrws.com";
 
-    const urls = papers.map(p => `
+    const staticUrls = [
+      { loc: `${baseUrl}/`, priority: 1.0 },
+      { loc: `${baseUrl}/about`, priority: 1.0 },
+      { loc: `${baseUrl}/contact`, priority: 0.8 },
+    ];
+
+    const staticUrlXml = staticUrls.map(url => `
+      <url>
+        <loc>${url.loc}</loc>
+        <lastmod>${new Date().toISOString()}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>${url.priority}</priority>
+      </url>`).join("");
+
+    const paperUrlsXml = papers.map(p => `
       <url>
         <loc>${baseUrl}/paper/view/${p.slug}</loc>
         <lastmod>${p.updatedAt.toISOString()}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
-      </url>
-    `).join("");
+      </url>`).join("");
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      <url>
-        <loc>${baseUrl}</loc>
-        <priority>1.0</priority>
-      </url>
-      ${urls}
-    </urlset>`;
+      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        ${staticUrlXml}
+        ${paperUrlsXml}
+      </urlset>`;
 
     res.header("Content-Type", "application/xml");
     res.send(sitemap);
   } catch (err) {
+    console.error("❌ Error generating sitemap:", err);
     res.status(500).send("Error generating sitemap");
   }
 });
+
 
 app.get("/api/papers/slug/:slug", async (req, res) => {
   try {
