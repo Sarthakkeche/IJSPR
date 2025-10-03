@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import multer from "multer";
+import slugify from "slugify";
 import path from "path";
 import { fileURLToPath } from "url";
 import AWS from "aws-sdk";
@@ -60,6 +61,7 @@ const paperSchema = new mongoose.Schema({
   title: { type: String, required: true },
   Author: { type: String },
   Date: { type: String },
+  slug: { type: String, unique: true },
   fileUrl: { type: String, required: true },
   issueId: { type: mongoose.Schema.Types.ObjectId, ref: "Issue", required: true },
   uniqueCode: { type: String, index: true }
@@ -160,10 +162,11 @@ app.post("/api/papers/:issueId", upload.single("file"), async (req, res) => {
 
   try {
     const data = await s3.upload(params).promise();
-
+const slug = slugify(req.body.title, { lower: true, strict: true });
     const paper = new Paper({
       title: req.body.title,
       Author: req.body.Author,
+       slug,
       Date: req.body.Date,
       fileUrl: data.Location,       // ✅ S3 URL
       issueId: req.params.issueId,
@@ -303,6 +306,48 @@ app.get("/api/statistics", async (req, res) => {
     res.status(500).json({ message: "Error fetching statistics" });
   }
 });
+
+app.get("/sitemap.xml", async (req, res) => {
+  try {
+    const papers = await Paper.find({}, "slug updatedAt");
+    const baseUrl = "https://ijrws.com";
+
+    const urls = papers.map(p => `
+      <url>
+        <loc>${baseUrl}/paper/view/${p.slug}</loc>
+        <lastmod>${p.updatedAt.toISOString()}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+      </url>
+    `).join("");
+
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>${baseUrl}</loc>
+        <priority>1.0</priority>
+      </url>
+      ${urls}
+    </urlset>`;
+
+    res.header("Content-Type", "application/xml");
+    res.send(sitemap);
+  } catch (err) {
+    res.status(500).send("Error generating sitemap");
+  }
+});
+
+app.get("/api/papers/slug/:slug", async (req, res) => {
+  try {
+    const paper = await Paper.findOne({ slug: req.params.slug });
+    if (!paper) return res.status(404).json({ message: "Paper not found" });
+    res.json(paper);
+  } catch (err) {
+    console.error("Error fetching paper by slug:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 // Root
 app.get("/", (req, res) => res.send("✅ IJRWS backend is running!"));

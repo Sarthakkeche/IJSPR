@@ -1,4 +1,5 @@
+
 User-agent: *
-Disallow:
+Allow: /
 
 Sitemap: https://ijrws.com/sitemap.xml

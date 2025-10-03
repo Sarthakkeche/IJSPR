@@ -10,6 +10,8 @@ import CurrentIssuePage from "./Components/Issue";
 import PaperPage from "./Components/PagePaper";
 import SubmitManuscriptPage from "./Components/Submit";
 import CheckStatusPage from "./Components/Status";
+import PaperView from './Components/PaperView';
+
 
 const RoutesConfig = () => {
   return useRoutes([
@@ -33,6 +35,7 @@ const RoutesConfig = () => {
     {path:"/currentpage" , element:<CurrentIssuePage/>
     },
     {path:"/paper/:issueId" , element:<PaperPage/>},
+    { path: "/paper/view/:slug", element: <PaperView /> } ,
     
     
 
