@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ijrws.com/sitemap.xml
+Sitemap: https://ijrws.com/api/sitemap.xml
