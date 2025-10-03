@@ -1,5 +1,7 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/(.*)", "destination": "/" },
+    { "source": "/api/(.*)", "destination": "https://ijspr.onrender.com/api/$1" }
+  
   ]
 }
