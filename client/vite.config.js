@@ -11,5 +11,14 @@ export default defineConfig({
   },
   server: {
     historyApiFallback: true,
+     proxy: {
+      '/api': {
+        target: 'https://ijspr.onrender.com',   // your backend URL
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, '/api')
+      }
+    }
   }
+  
 })
+
