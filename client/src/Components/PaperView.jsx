@@ -20,7 +20,7 @@ export default function PaperView() {
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 min-h-screen text-gray-800 flex flex-col justify-between">
       <Navbar />
-      <div className="max-w-3xl mx-auto py-16 px-4">
+      <div className="max-w-3xl mx-auto mt-40 py-16 px-4">
         <Helmet>
           <title>{paper.title} | IJRWS Journal</title>
           <meta name="description" content={`Research paper by ${paper.Author}`} />

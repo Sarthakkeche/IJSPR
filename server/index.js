@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin: [
     "https://ijrws.com",
-    "http://localhost:5173",
+    "http://localhost:5174",
     "https://ijrwsadmin.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
@@ -53,7 +53,7 @@ const Volume = mongoose.model("Volume", volumeSchema);
 
 const issueSchema = new mongoose.Schema({
   name: String,
-  volumeId: { type: mongoose.Schema.Types.ObjectId, ref: "Volume" }
+    volumeId: { type: mongoose.Schema.Types.ObjectId, ref: "Volume", index: true } // Speeds up GET /api/issues/:volumeId
 });
 const Issue = mongoose.model("Issue", issueSchema);
 
@@ -61,11 +61,12 @@ const paperSchema = new mongoose.Schema({
   title: { type: String, required: true },
   Author: { type: String },
   Date: { type: String },
-  slug: { type: String, unique: true },
   fileUrl: { type: String, required: true },
-  issueId: { type: mongoose.Schema.Types.ObjectId, ref: "Issue", required: true },
+   slug: { type: String, unique: true, index: true }, // unique already creates an index, but being explicit is fine
+    issueId: { type: mongoose.Schema.Types.ObjectId, ref: "Issue", required: true, index: true }, // Speeds up GET /api/papers/:issueId
   uniqueCode: { type: String, index: true }
 }, { timestamps: true });
+paperSchema.index({ createdAt: -1 });
 const Paper = mongoose.model("Paper", paperSchema);
 
 const manuscriptSchema = new mongoose.Schema({
@@ -74,6 +75,7 @@ const manuscriptSchema = new mongoose.Schema({
   paperFile: { type: String, required: true },
   uniqueCode: { type: String, required: true, unique: true }
 }, { timestamps: true });
+manuscriptSchema.index({ createdAt: -1 });
 const Manuscript = mongoose.model("Manuscript", manuscriptSchema);
 
 // ✅ Multer (memory for S3 uploads)
@@ -137,10 +139,12 @@ app.get("/api/issues/all", async (req, res) => {
 
 // Papers
 app.get("/api/papers/latest", async (req, res) => {
-  try {
-    const latestPapers = await Paper.find().sort({ createdAt: -1 }).limit(10);
-    res.json(latestPapers);
-  } catch {
+ try {
+  const latestPapers = await Paper.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('title Author slug Date'); // Select only the fields you need to display in the list res.json(latestPapers);
+ } catch {
     res.status(500).json({ message: "Error fetching latest papers" });
   }
 });
@@ -360,6 +364,100 @@ app.get("/api/papers/slug/:slug", async (req, res) => {
   }
 });
 
+
+// =================== DELETE ROUTES (ADMIN) ===================
+
+// ✅ 1. Delete a single published Paper by its ID
+app.delete("/api/papers/:paperId", async (req, res) => {
+  try {
+    const { paperId } = req.params;
+    const deletedPaper = await Paper.findByIdAndDelete(paperId);
+
+    if (!deletedPaper) {
+      return res.status(404).json({ message: "Paper not found" });
+    }
+
+    // You might also want to delete the associated file from AWS S3 here (optional)
+
+    res.json({ success: true, message: "Paper deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting paper:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ 2. Delete a single Issue by its ID (and all Papers within it)
+app.delete("/api/issues/:issueId", async (req, res) => {
+  try {
+    const { issueId } = req.params;
+
+    // First, find and delete all Papers associated with this Issue
+    await Paper.deleteMany({ issueId: issueId });
+
+    // Then, delete the Issue itself
+    const deletedIssue = await Issue.findByIdAndDelete(issueId);
+
+    if (!deletedIssue) {
+      return res.status(404).json({ message: "Issue not found" });
+    }
+
+    res.json({ success: true, message: "Issue and all its papers have been deleted" });
+  } catch (err) {
+    console.error("❌ Error deleting issue:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ 3. Delete a single Volume by its ID (and all Issues and Papers within it)
+app.delete("/api/volumes/:volumeId", async (req, res) => {
+  try {
+    const { volumeId } = req.params;
+
+    // Step 1: Find all Issues belonging to this Volume
+    const issuesToDelete = await Issue.find({ volumeId: volumeId }, '_id');
+    const issueIds = issuesToDelete.map(issue => issue._id);
+
+    // Step 2: Delete all Papers that belong to any of those Issues
+    if (issueIds.length > 0) {
+      await Paper.deleteMany({ issueId: { $in: issueIds } });
+    }
+
+    // Step 3: Delete all the Issues themselves
+    await Issue.deleteMany({ volumeId: volumeId });
+
+    // Step 4: Finally, delete the Volume
+    const deletedVolume = await Volume.findByIdAndDelete(volumeId);
+
+    if (!deletedVolume) {
+      return res.status(404).json({ message: "Volume not found" });
+    }
+
+    res.json({ success: true, message: "Volume and all its issues and papers have been deleted" });
+  } catch (err) {
+    console.error("❌ Error deleting volume:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// ✅ 4. Delete a single pending Manuscript by its ID
+app.delete("/api/manuscripts/:manuscriptId", async (req, res) => {
+  try {
+    const { manuscriptId } = req.params;
+    const deletedManuscript = await Manuscript.findByIdAndDelete(manuscriptId);
+
+    if (!deletedManuscript) {
+      return res.status(404).json({ message: "Manuscript not found" });
+    }
+    
+    // You might also want to delete the associated file from AWS S3 here (optional)
+
+    res.json({ success: true, message: "Manuscript deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting manuscript:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Root
 app.get("/", (req, res) => res.send("✅ IJRWS backend is running!"));
