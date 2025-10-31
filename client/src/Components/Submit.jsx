@@ -89,7 +89,7 @@ const SubmitManuscriptPage = () => {
             // OJS requires these fields, so we provide them
             country: "IN", 
             includeInBrowse: true,
-            userGroupId: 16, // 16 is typically the default ID for the "Author" role
+            userGroupId: 14, // 16 is typically the default ID for the "Author" role
           }
         ]
       };
