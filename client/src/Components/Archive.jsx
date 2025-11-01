@@ -25,7 +25,7 @@ const ArchivePage = () => {
         const res = await axios.get(
           `${OJS_API_URL}/issues`, 
           {
-            headers: { 'Api-Key': OJS_API_KEY },
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } ,
             params: {
               // We can add parameters to ask OJS to pre-order them for us
               orderBy: 'volume',

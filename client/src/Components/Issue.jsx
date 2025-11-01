@@ -23,11 +23,7 @@ const CurrentIssuePage = () => {
         // This is the new API call to OJS to get the current published issue
         const res = await axios.get(
           `${OJS_API_URL}/issues/current`, 
-          {
-            headers: {
-              'Api-Key': OJS_API_KEY
-            }
-          }
+          { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
         );
 
         // The issue object contains an array of its publications (papers)
