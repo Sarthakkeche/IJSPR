@@ -46,73 +46,67 @@ const SubmitManuscriptPage = () => {
     setIsSubmitting(true);
     setStatus("Submitting... please wait.");
 
-    try {
-      // --- OJS Submission is a 3-Step Process ---
+   try {
+      // --- New 2-Step Process ---
+      // Step 1: Create the submission with ALL metadata at once
+      setStatus("Step 1/2: Submitting all article data...");
 
-      // Step 1: Create a draft submission
-      // We MUST provide a title and the sectionId (we assume '1' for the "Articles" section)
-      setStatus("Step 1/3: Creating submission draft...");
-      const draftData = {
-        title: { en_US: form.paperTitle },
-        sectionId: 1, // Assumes the ID of your "Articles" section is 1.
-        status: 1, // 1 means "Queued" or "Incomplete"
-      };
+      const submissionData = {
+        title: { en_US: form.paperTitle },
+        abstract: { en_US: form.abstract },
+        sectionId: 1, // We confirmed this is 1
+        status: 1, // 1 means "Queued" or "Incomplete"
+        authors: [
+          {
+            name: form.authorName,
+            email: form.authorEmail,
+            country: "IN",
+            includeInBrowse: true,
+            userGroupId: 14, // We confirmed this is 14 (Author)
+          }
+        ]
+      };
 
-      const draftResponse = await axios.post(
-        `${OJS_API_URL}/submissions`,
-        draftData,
-        // 1. CORRECTION: Added backticks (`) for the Authorization header
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
-      );
+      const submissionResponse = await axios.post(
+        `${OJS_API_URL}/submissions`,
+        submissionData,
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
+      );
 
-      const submissionId = draftResponse.data.id;
-      const publicationId = draftResponse.data.currentPublicationId; // Get the ID for the metadata
+      const submissionId = submissionResponse.data.id;
 
-      // Step 2: Upload the manuscript file
-      setStatus("Step 2/3: Uploading manuscript file...");
-      const fileData = new FormData();
-      fileData.append('file', paperFile);
+      // Step 2: Upload the manuscript file to the new submission
+      setStatus("Step 2/2: Uploading manuscript file...");
+      
+      const fileData = new FormData();
+      fileData.append('file', paperFile);
 
-      await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files`,
-        fileData,
-        // 2. CORRECTION: Changed 'Api-Key' to 'Authorization'
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
-      );
+      await axios.post(
+        `${OJS_API_URL}/submissions/${submissionId}/files`,
+        fileData,
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
+      );
 
-      // Step 3: Update the submission with metadata (author, abstract)
-      setStatus("Step 3/3: Adding metadata (author, abstract)...");
-      const metadata = {
-        abstract: { en_US: form.abstract },
-        authors: [
-        {
-            name: form.authorName,
-            email: form.authorEmail,
-            // OJS requires these fields, so we provide them
-            country: "IN", 
-            includeInBrowse: true,
-            userGroupId: 14, // We confirmed this is your Author ID
-          }
-        ]
-      };
+      // All steps done!
+      setUniqueCode(submissionId); // Use the OJS submission ID as the tracking code
+      setStatus("✅ Paper submitted successfully!");
+      setForm({ authorName: "", authorEmail: "", paperTitle: "", abstract: "" });
+      setPaperFile(null);
+      e.target.reset(); // Resets the file input field
+      setIsSubmitting(false);
 
-      await axios.put(
-        `${OJS_API_URL}/publications/${publicationId}`,
-        metadata,
-        // 3. CORRECTION: Changed 'Api-Key' to 'Authorization'
-     { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
-      );
-
-      // All steps done!
-      setUniqueCode(submissionId); // Use the OJS submission ID as the tracking code
-      setStatus("✅ Paper submitted successfully!");
-      setForm({ authorName: "", authorEmail: "", paperTitle: "", abstract: "" });
-      setPaperFile(null);
-      e.target.reset(); // Resets the file input field
-      setIsSubmitting(false);
-} catch (error) {
+    } catch (error) {
+      // This is where we will see the new error if it fails
       console.error("Submission failed:", error.response ? error.response.data : error.message);
-      setStatus(`❌ Failed to submit paper. ${error.response ? error.response.data.message : 'Check console.'}`);
+      
+      // Try to get a more specific error message from OJS
+      let ojsErrorMessage = "Check console for details.";
+      if (error.response && error.response.data && error.response.data.error) {
+         // OJS often sends errors like { "error": "validation.required", "errorMessage": "The abstract is required." }
+         ojsErrorMessage = error.response.data.errorMessage || error.response.data.error;
+      }
+
+      setStatus(`❌ Failed to submit paper. OJS said: "${ojsErrorMessage}"`);
       setIsSubmitting(false);
     }
   };
