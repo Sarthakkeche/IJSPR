@@ -32,7 +32,7 @@ const SubmitManuscriptPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   const handleFileChange = (e) => setPaperFile(e.target.files[0]);
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return; // Stop if already submitting
 
@@ -46,7 +46,7 @@ const SubmitManuscriptPage = () => {
     setIsSubmitting(true);
     setStatus("Submitting... please wait.");
 
-   try {
+    try {
       // --- New 2-Step Process (v2) ---
       // Step 1: Create the submission with ALL metadata
       setStatus("Step 1/2: Submitting all article data...");
@@ -55,7 +55,6 @@ const SubmitManuscriptPage = () => {
         title: { en_US: form.paperTitle },
         abstract: { en_US: form.abstract },
         sectionId: 1, // We confirmed this is 1
-        // REMOVED: status: 1, - This is likely the cause of the 400 error.
         authors: [
           {
             name: form.authorName,
@@ -70,7 +69,7 @@ const SubmitManuscriptPage = () => {
       const submissionResponse = await axios.post(
         `${OJS_API_URL}/submissions`,
         submissionData,
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } } // Correct Header 1
       );
 
       const submissionId = submissionResponse.data.id;
@@ -84,7 +83,8 @@ const SubmitManuscriptPage = () => {
       await axios.post(
         `${OJS_API_URL}/submissions/${submissionId}/files`,
         fileData,
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
+        // **THIS IS THE LINE WE ARE FIXING:**
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } } // Correct Header 2
       );
 
       // All steps done!
@@ -102,7 +102,6 @@ const SubmitManuscriptPage = () => {
       let ojsErrorMessage = "Check console for details.";
       if (error.response && error.response.data) {
          // OJS often sends errors like: { "abstract": ["The abstract is required."] }
-         // Let's find the first error message.
          const errorFields = Object.keys(error.response.data);
          if (errorFields.length > 0) {
             const firstErrorField = errorFields[0];
@@ -116,7 +115,6 @@ const SubmitManuscriptPage = () => {
       setIsSubmitting(false);
     }
   };
-
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
