@@ -69,7 +69,7 @@ const SubmitManuscriptPage = () => {
       const submissionResponse = await axios.post(
         `${OJS_API_URL}/submissions`,
         submissionData,
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } } // Correct Header 1
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
       );
 
       const submissionId = submissionResponse.data.id;
@@ -79,12 +79,18 @@ const SubmitManuscriptPage = () => {
       
       const fileData = new FormData();
       fileData.append('file', paperFile);
+      
+      // -----------------------------------------------------------------
+      // **THIS IS THE FINAL FIX:**
+      // We must tell OJS what "stage" this file belongs to.
+      // '2' is the standard ID for the main "Submission File" (the article manuscript).
+      fileData.append('fileStage', '2');
+      // -----------------------------------------------------------------
 
       await axios.post(
         `${OJS_API_URL}/submissions/${submissionId}/files`,
         fileData,
-        // **THIS IS THE LINE WE ARE FIXING:**
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } } // Correct Header 2
+        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
       );
 
       // All steps done!
@@ -101,13 +107,17 @@ const SubmitManuscriptPage = () => {
       
       let ojsErrorMessage = "Check console for details.";
       if (error.response && error.response.data) {
-         // OJS often sends errors like: { "abstract": ["The abstract is required."] }
-         const errorFields = Object.keys(error.response.data);
-         if (errorFields.length > 0) {
-            const firstErrorField = errorFields[0];
-            ojsErrorMessage = `${firstErrorField}: ${error.response.data[firstErrorField][0]}`;
-         } else if (error.response.data.error) {
-            ojsErrorMessage = error.response.data.errorMessage || error.response.data.error;
+         const errorData = error.response.data;
+         if (errorData.errorMessage) {
+            // This is the error we see now: {error: '...', errorMessage: '...'}
+            ojsErrorMessage = errorData.errorMessage;
+         } else {
+            // This handles other validation errors: { "abstract": ["The abstract is required."] }
+            const errorFields = Object.keys(errorData);
+            if (errorFields.length > 0) {
+              const firstErrorField = errorFields[0];
+              ojsErrorMessage = `${firstErrorField}: ${errorData[firstErrorField][0]}`;
+            }
          }
       }
 
