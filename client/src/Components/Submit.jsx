@@ -47,15 +47,15 @@ const SubmitManuscriptPage = () => {
     setStatus("Submitting... please wait.");
 
    try {
-      // --- New 2-Step Process ---
-      // Step 1: Create the submission with ALL metadata at once
+      // --- New 2-Step Process (v2) ---
+      // Step 1: Create the submission with ALL metadata
       setStatus("Step 1/2: Submitting all article data...");
 
       const submissionData = {
         title: { en_US: form.paperTitle },
         abstract: { en_US: form.abstract },
         sectionId: 1, // We confirmed this is 1
-        status: 1, // 1 means "Queued" or "Incomplete"
+        // REMOVED: status: 1, - This is likely the cause of the 400 error.
         authors: [
           {
             name: form.authorName,
@@ -99,11 +99,17 @@ const SubmitManuscriptPage = () => {
       // This is where we will see the new error if it fails
       console.error("Submission failed:", error.response ? error.response.data : error.message);
       
-      // Try to get a more specific error message from OJS
       let ojsErrorMessage = "Check console for details.";
-      if (error.response && error.response.data && error.response.data.error) {
-         // OJS often sends errors like { "error": "validation.required", "errorMessage": "The abstract is required." }
-         ojsErrorMessage = error.response.data.errorMessage || error.response.data.error;
+      if (error.response && error.response.data) {
+         // OJS often sends errors like: { "abstract": ["The abstract is required."] }
+         // Let's find the first error message.
+         const errorFields = Object.keys(error.response.data);
+         if (errorFields.length > 0) {
+            const firstErrorField = errorFields[0];
+            ojsErrorMessage = `${firstErrorField}: ${error.response.data[firstErrorField][0]}`;
+         } else if (error.response.data.error) {
+            ojsErrorMessage = error.response.data.errorMessage || error.response.data.error;
+         }
       }
 
       setStatus(`❌ Failed to submit paper. OJS said: "${ojsErrorMessage}"`);
