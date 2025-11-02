@@ -10,30 +10,37 @@ const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 const CurrentIssuePage = () => {
   const [papers, setPapers] = useState([]);
   const [issueTitle, setIssueTitle] = useState('Current Issue');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCurrentIssue = async () => {
-      // Check if the API URL is set
       if (!OJS_API_URL || !OJS_API_KEY) {
         console.error('OJS API URL or Key is not configured.');
+        setLoading(false);
         return;
       }
 
       try {
-        // This is the new API call to OJS to get the current published issue
         const res = await axios.get(
           `${OJS_API_URL}/issues/current`, 
-          { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
+          {
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
+          }
         );
 
-        // The issue object contains an array of its publications (papers)
-        setPapers(res.data.publications);
-        // You can also get the title of the issue
-        setIssueTitle(res.data.title.en || 'Current Issue');
+        // --- HERE ARE THE FIXES ---
+        // FIX 1: Check if publications exists. If not, use an empty array [].
+        // This stops the "undefined.length" error.
+        setPapers(res.data.publications || []);
+        
+        // FIX 2: Safely access the title.
+        setIssueTitle((res.data.title && res.data.title.en) || 'Current Issue');
+        
+        setLoading(false);
         
       } catch (err) {
         console.error('Error fetching current issue:', err);
-        // This might happen if no issue is currently "published" as current
+        setLoading(false);
         if (err.response && err.response.status === 404) {
           console.warn('No current issue found. Please publish an issue in OJS.');
         }
@@ -56,23 +63,24 @@ const CurrentIssuePage = () => {
 
       <section className="flex-grow py-12 px-4 md:px-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {papers.length > 0 ? (
+          {loading ? (
+            <p className="col-span-full text-center text-gray-500">Loading...</p>
+          ) : papers.length > 0 ? (
             papers.map(paper => {
-              // OJS provides final files in a "galleys" array.
-              // We find the PDF galley to get its public URL.
-              const pdfGalley = paper.galleys.find(
+              // FIX 3: Safely check for galleys.
+              const pdfGalley = (paper.galleys || []).find(
                 galley => galley.label === 'PDF' || galley.fileType === 'application/pdf'
               );
               const fileUrl = pdfGalley ? pdfGalley.urlPublished : null;
 
               return (
                 <div key={paper.id} className="bg-white p-4 rounded shadow">
-                  {/* DATA MAPPING: OJS data structure is different */}
-                  <h2 className="text-lg font-semibold mb-2">{paper.fullTitle.en || "Title not available"}</h2>
+                  {/* FIX 4: Safely check for fullTitle */}
+                  <h2 className="text-lg font-semibold mb-2">{(paper.fullTitle && paper.fullTitle.en) || "Title not available"}</h2>
                   <p className="text-sm text-gray-600 mb-2">{paper.authorsString || "Unknown Author"}</p>
                   <p className="text-sm text-gray-700 mb-3">
                     {paper.datePublished ? new Date(paper.datePublished).toLocaleDateString() : "Date not provided"}
-                  </p>
+                  </j>
                   
                   {fileUrl ? (
                     <a
