@@ -80,7 +80,7 @@ const CurrentIssuePage = () => {
                   <p className="text-sm text-gray-600 mb-2">{paper.authorsString || "Unknown Author"}</p>
                   <p className="text-sm text-gray-700 mb-3">
                     {paper.datePublished ? new Date(paper.datePublished).toLocaleDateString() : "Date not provided"}
-                  </j>
+                  </p> {/* <--- THIS IS THE CORRECTED LINE */}
                   
                   {fileUrl ? (
                     <a
