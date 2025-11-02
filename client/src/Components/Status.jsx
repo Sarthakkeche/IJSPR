@@ -7,8 +7,9 @@ import axios from "axios";
 import statusImg from "../assets/status.jpg";
 import checkBg from "../assets/checkbg.jpg";
 
-// ✅ API base URL config
-const API_BASE_URL = "https://ijspr.onrender.com";
+// Get the API URL and Key from Vercel's Environment Variables
+const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
+const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
 const CheckStatusPage = () => {
   useEffect(() => {
@@ -21,12 +22,37 @@ const CheckStatusPage = () => {
   const handleCheck = async (e) => {
     e.preventDefault();
     setStatus("⏳ Checking...");
+
+    if (!OJS_API_URL || !OJS_API_KEY) {
+      console.error('OJS API URL or Key is not configured.');
+      setStatus("❌ Configuration error. Please contact site admin.");
+      return;
+    }
+    if (!code) {
+      setStatus("❌ Please enter a tracking code.");
+      return;
+    }
+
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/papers/status/${code}`);
-      setStatus(`📌 Status: ${res.data.status}`);
+      // New OJS API Call:
+      // We are fetching a specific submission by its ID (which is our 'code')
+      const res = await axios.get(
+        `${OJS_API_URL}/submissions/${code}`, 
+        {
+          headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
+        }
+      );
+
+      // OJS provides a human-readable status label
+      setStatus(`📌 Status: ${res.data.statusLabel}`);
+
     } catch (error) {
       console.error("❌ Error fetching status:", error);
-      setStatus("❌ Error checking status. Please try again.");
+      if (error.response && error.response.status === 404) {
+        setStatus("❌ Error: Submission ID not found. Please check your code.");
+      } else {
+        setStatus("❌ Error checking status. Please try again.");
+      }
     }
   };
 
@@ -62,13 +88,13 @@ const CheckStatusPage = () => {
 
             <div>
               <label className="block mb-2 text-sm font-semibold text-gray-600">
-                Unique Code
+                Unique Code (Submission ID)
               </label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="Enter your tracking code"
+                placeholder="Enter your tracking code (e.g., 7)"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
               />
