@@ -13,7 +13,7 @@ const CurrentIssuePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCurrentIssuePapers = async () => {
+    const fetchCurrentIssue = async () => {
       if (!OJS_API_URL || !OJS_API_KEY) {
         console.error('OJS API URL or Key is not configured.');
         setLoading(false);
@@ -21,36 +21,32 @@ const CurrentIssuePage = () => {
       }
 
       try {
-        // --- THIS IS THE NEW 2-STEP LOGIC ---
-
-        // Step 1: Get the current issue to find its ID
-        const currentIssueRes = await axios.get(
-          `${OJS_API_URL}/issues/current`,
+        // This is the only API call we need
+        const res = await axios.get(
+          `${OJS_API_URL}/issues/current`, 
           {
             headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
           }
         );
 
-        const currentIssue = currentIssueRes.data;
-        const currentIssueId = currentIssue.id;
+        // --- HERE IS THE FINAL FIX ---
         
-        // Set the title from this first request
-        setIssueTitle((currentIssue.title && currentIssue.title.en) || 'Current Issue');
+        // 1. Set the issue title
+        setIssueTitle((res.data.title && res.data.title.en) || 'Current Issue');
 
-        // Step 2: Use the ID to get the *full* issue details, including papers
-        const fullIssueRes = await axios.get(
-          `${OJS_API_URL}/issues/${currentIssueId}`,
-          {
-            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
-          }
-        );
-
-        // This response will have the 'publications' (papers) array
-        setPapers(fullIssueRes.data.publications || []);
+        // 2. The API sends an 'articles' array (which are submissions)
+        // Each article has a 'publications' array inside it. We extract the first publication from each.
+        if (res.data.articles && res.data.articles.length > 0) {
+          const extractedPapers = res.data.articles.map(article => article.publications[0]);
+          setPapers(extractedPapers);
+        } else {
+          setPapers([]);
+        }
+        
         setLoading(false);
         
       } catch (err) {
-        console.error('Error fetching current issue papers:', err);
+        console.error('Error fetching current issue:', err);
         setLoading(false);
         if (err.response && err.response.status === 404) {
           console.warn('No current issue found. Please publish an issue in OJS.');
@@ -58,7 +54,7 @@ const CurrentIssuePage = () => {
       }
     };
 
-    fetchCurrentIssuePapers();
+    fetchCurrentIssue();
   }, []);
 
   return (
@@ -67,7 +63,7 @@ const CurrentIssuePage = () => {
 
       <section className="relative bg-gray-800 text-white py-20 px-4 md:px-20 mt-20">
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl font-bold">{issueTitle}</h1>
+          <h1 className="text-4xl font-bold" dangerouslySetInnerHTML={{ __html: issueTitle }} />
           <p className="text-lg mt-2">All Papers from the Latest Published Issue</p>
         </div>
       </section>
@@ -78,15 +74,21 @@ const CurrentIssuePage = () => {
             <p className="col-span-full text-center text-gray-500">Loading...</p>
           ) : papers.length > 0 ? (
             papers.map(paper => {
+              // The 'galleys' array holds the files (e.g., PDF)
               const pdfGalley = (paper.galleys || []).find(
-                galley => galley.label === 'PDF' || galley.fileType === 'application/pdf'
+                galley => galley.label === 'pdf' || galley.fileType === 'application/pdf'
               );
+              // Get the direct download URL
               const fileUrl = pdfGalley ? pdfGalley.urlPublished : null;
 
               return (
                 <div key={paper.id} className="bg-white p-4 rounded shadow">
-                  <h2 className="text-lg font-semibold mb-2">{(paper.fullTitle && paper.fullTitle.en) || "Title not available"}</h2>
-                  <p className="text-sm text-gray-600 mb-2">{paper.authorsString || "Unknown Author"}</p>
+                  {/* We use dangerouslySetInnerHTML to render the <b> tags in your title */}
+                  <h2 
+                    className="text-lg font-semibold mb-2" 
+                    dangerouslySetInnerHTML={{ __html: (paper.fullTitle && paper.fullTitle.en) || "Title not available" }} 
+                  />
+                  <p className="text-sm text-gray-600 mb-2">{paper.authorsStringShort || "Unknown Author"}</p>
                   <p className="text-sm text-gray-700 mb-3">
                     {paper.datePublished ? new Date(paper.datePublished).toLocaleDateString() : "Date not provided"}
                   </p>
