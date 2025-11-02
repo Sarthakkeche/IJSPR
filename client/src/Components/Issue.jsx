@@ -29,12 +29,10 @@ const CurrentIssuePage = () => {
           }
         );
 
-        // --- HERE IS THE FINAL FIX ---
-        
-        // 1. Set the issue title
+        // Set the issue title
         setIssueTitle((res.data.title && res.data.title.en) || 'Current Issue');
 
-        // 2. The API sends an 'articles' array (which are submissions)
+        // The API sends an 'articles' array (which are submissions)
         // Each article has a 'publications' array inside it. We extract the first publication from each.
         if (res.data.articles && res.data.articles.length > 0) {
           const extractedPapers = res.data.articles.map(article => article.publications[0]);
@@ -74,16 +72,17 @@ const CurrentIssuePage = () => {
             <p className="col-span-full text-center text-gray-500">Loading...</p>
           ) : papers.length > 0 ? (
             papers.map(paper => {
-              // The 'galleys' array holds the files (e.g., PDF)
+              // --- THIS IS THE FIX ---
               const pdfGalley = (paper.galleys || []).find(
                 galley => galley.label === 'pdf' || galley.fileType === 'application/pdf'
               );
-              // Get the direct download URL
-              const fileUrl = pdfGalley ? pdfGalley.urlPublished : null;
+              
+              // We now use pdfGalley.file.url (the direct download link)
+              // instead of pdfGalley.urlPublished (the broken viewer link)
+              const fileUrl = (pdfGalley && pdfGalley.file) ? pdfGalley.file.url : null;
 
               return (
                 <div key={paper.id} className="bg-white p-4 rounded shadow">
-                  {/* We use dangerouslySetInnerHTML to render the <b> tags in your title */}
                   <h2 
                     className="text-lg font-semibold mb-2" 
                     dangerouslySetInnerHTML={{ __html: (paper.fullTitle && paper.fullTitle.en) || "Title not available" }} 
