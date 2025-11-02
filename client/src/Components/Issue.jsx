@@ -13,7 +13,7 @@ const CurrentIssuePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCurrentIssue = async () => {
+    const fetchCurrentIssuePapers = async () => {
       if (!OJS_API_URL || !OJS_API_KEY) {
         console.error('OJS API URL or Key is not configured.');
         setLoading(false);
@@ -21,25 +21,36 @@ const CurrentIssuePage = () => {
       }
 
       try {
-        const res = await axios.get(
-          `${OJS_API_URL}/issues/current`, 
+        // --- THIS IS THE NEW 2-STEP LOGIC ---
+
+        // Step 1: Get the current issue to find its ID
+        const currentIssueRes = await axios.get(
+          `${OJS_API_URL}/issues/current`,
           {
             headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
           }
         );
 
-        // --- HERE ARE THE FIXES ---
-        // FIX 1: Check if publications exists. If not, use an empty array [].
-        // This stops the "undefined.length" error.
-        setPapers(res.data.publications || []);
+        const currentIssue = currentIssueRes.data;
+        const currentIssueId = currentIssue.id;
         
-        // FIX 2: Safely access the title.
-        setIssueTitle((res.data.title && res.data.title.en) || 'Current Issue');
-        
+        // Set the title from this first request
+        setIssueTitle((currentIssue.title && currentIssue.title.en) || 'Current Issue');
+
+        // Step 2: Use the ID to get the *full* issue details, including papers
+        const fullIssueRes = await axios.get(
+          `${OJS_API_URL}/issues/${currentIssueId}`,
+          {
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
+          }
+        );
+
+        // This response will have the 'publications' (papers) array
+        setPapers(fullIssueRes.data.publications || []);
         setLoading(false);
         
       } catch (err) {
-        console.error('Error fetching current issue:', err);
+        console.error('Error fetching current issue papers:', err);
         setLoading(false);
         if (err.response && err.response.status === 404) {
           console.warn('No current issue found. Please publish an issue in OJS.');
@@ -47,7 +58,7 @@ const CurrentIssuePage = () => {
       }
     };
 
-    fetchCurrentIssue();
+    fetchCurrentIssuePapers();
   }, []);
 
   return (
@@ -67,7 +78,6 @@ const CurrentIssuePage = () => {
             <p className="col-span-full text-center text-gray-500">Loading...</p>
           ) : papers.length > 0 ? (
             papers.map(paper => {
-              // FIX 3: Safely check for galleys.
               const pdfGalley = (paper.galleys || []).find(
                 galley => galley.label === 'PDF' || galley.fileType === 'application/pdf'
               );
@@ -75,12 +85,11 @@ const CurrentIssuePage = () => {
 
               return (
                 <div key={paper.id} className="bg-white p-4 rounded shadow">
-                  {/* FIX 4: Safely check for fullTitle */}
                   <h2 className="text-lg font-semibold mb-2">{(paper.fullTitle && paper.fullTitle.en) || "Title not available"}</h2>
                   <p className="text-sm text-gray-600 mb-2">{paper.authorsString || "Unknown Author"}</p>
                   <p className="text-sm text-gray-700 mb-3">
                     {paper.datePublished ? new Date(paper.datePublished).toLocaleDateString() : "Date not provided"}
-                  </p> {/* <--- THIS IS THE CORRECTED LINE */}
+                  </p>
                   
                   {fileUrl ? (
                     <a
