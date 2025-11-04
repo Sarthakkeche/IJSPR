@@ -10,7 +10,6 @@ const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
 const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
 export default function IssueView() {
-  // We use issueId, which matches our new route: /issue/:issueId
   const { issueId } = useParams();
   const [issue, setIssue] = useState(null);
   const [papers, setPapers] = useState([]);
@@ -27,18 +26,27 @@ export default function IssueView() {
       }
       
       try {
-        // New API call: Get a single issue by its ID
+        // --- THIS IS THE FIX ---
+        // We are now using the correct 'Authorization' header
         const res = await axios.get(
           `${OJS_API_URL}/issues/${issueId}`, 
           {
-            headers: { 'Api-Key': OJS_API_KEY }
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } // <-- THE FIX
           }
         );
         
         // Save the issue data (like title)
         setIssue(res.data);
-        // Save the list of papers (called "publications" in OJS)
-        setPapers(res.data.publications || []);
+        
+        // --- THIS IS THE 2ND FIX ---
+        // We need to get papers from res.data.articles, just like on the CurrentIssue page
+        if (res.data.articles && res.data.articles.length > 0) {
+          const extractedPapers = res.data.articles.map(article => article.publications[0]);
+          setPapers(extractedPapers);
+        } else {
+          setPapers([]);
+        }
+
         setLoading(false);
 
       } catch (err) {
@@ -48,7 +56,7 @@ export default function IssueView() {
     };
 
     fetchIssueDetails();
-  }, [issueId]); // Run this effect when the issueId from the URL changes
+  }, [issueId]);
 
   if (loading) {
     return (
@@ -68,10 +76,15 @@ export default function IssueView() {
 
   // Helper function to get the PDF URL from a paper's "galleys"
   const getPdfUrl = (paper) => {
+    // Check for galleys array first
+    if (!paper.galleys || paper.galleys.length === 0) {
+      return null;
+    }
     const pdfGalley = paper.galleys.find(
-      (galley) => galley.label === 'PDF' || galley.fileType === 'application/pdf'
+      (galley) => galley.label === 'pdf' || galley.fileType === 'application/pdf'
     );
-    return pdfGalley ? pdfGalley.urlPublished : null;
+    // Use the direct file URL
+    return (pdfGalley && pdfGalley.file) ? pdfGalley.file.url : null;
   };
 
   return (
@@ -79,14 +92,14 @@ export default function IssueView() {
       <Navbar />
       <div className="max-w-5xl mx-auto mt-40 py-16 px-4 w-full">
         <Helmet>
-          <title>{issue.title.en || 'Issue'} | IJRWS Journal</title>
-          <meta name="description" content={`View all articles from ${issue.title.en || 'this issue'} of the IJRWS Journal.`} />
+          <title>{(issue.title && issue.title.en) || 'Issue'} | IJRWS Journal</title>
+          <meta name="description" content={`View all articles from ${(issue.title && issue.title.en) || 'this issue'} of the IJRWS Journal.`} />
           <link rel="canonical" href={`https://ijrws.com/issue/${issue.id}`} />
         </Helmet>
 
         {/* Issue Header */}
-        <h1 className="text-3xl font-bold mb-2 text-center">{issue.title.en || 'Issue'}</h1>
-        {issue.description.en && (
+        <h1 className="text-3xl font-bold mb-2 text-center" dangerouslySetInnerHTML={{ __html: (issue.title && issue.title.en) || 'Issue' }} />
+        {issue.description && issue.description.en && (
            <div 
              className="text-center text-gray-600 mb-10 prose" 
              dangerouslySetInnerHTML={{ __html: issue.description.en }} 
@@ -100,14 +113,17 @@ export default function IssueView() {
               const fileUrl = getPdfUrl(paper);
               return (
                 <div key={paper.id} className="bg-white p-6 rounded shadow-lg border border-gray-200">
-                  <h2 className="text-xl font-semibold mb-2 text-blue-800">{paper.fullTitle.en || "Title not available"}</h2>
-                  <p className="text-sm text-gray-600 mb-2"><strong>Authors:</strong> {paper.authorsString || "Unknown Author"}</p>
+                  <h2 
+                    className="text-xl font-semibold mb-2 text-blue-800" 
+                    dangerouslySetInnerHTML={{ __html: (paper.fullTitle && paper.fullTitle.en) || "Title not available" }} 
+                  />
+                  <p className="text-sm text-gray-600 mb-2"><strong>Authors:</strong> {paper.authorsStringShort || "Unknown Author"}</p>
                   <p className="text-sm text-gray-500 mb-4">
                     <strong>Published:</strong> {paper.datePublished ? new Date(paper.datePublished).toLocaleDateString() : "Date not provided"}
                   </p>
                   
                   {/* Collapsible Abstract */}
-                  {paper.abstract.en && (
+                  {paper.abstract && paper.abstract.en && (
                     <details className="mb-4">
                       <summary className="text-sm font-medium text-blue-600 cursor-pointer">View Abstract</summary>
                       <div 
