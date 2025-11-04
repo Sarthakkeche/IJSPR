@@ -70,28 +70,77 @@ const Home = () => {
 ];
 
 
- useEffect(() => {
-    axios.get("https://ijspr.onrender.com/api/statistics")
-      .then(res => {
-        const { totalIssues, totalAuthors } = res.data;
-
-        // update stats dynamically
-        setStats(prev =>
-          prev.map(item => {
-            if (item.label === "Issue Released") {
-              return { ...item, value: totalIssues.toString() };
-            }
-            if (item.label === "Authors") {
-              return { ...item, value: totalAuthors.toString() };
-            }
-            return item; // leave other stats as is
-          })
-        );
-      })
-      .catch(err => console.error(err));
-  }, []);
+ // Get the API URL and Key from Vercel's Environment Variables
+const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
+const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
 
+useEffect(() => {
+  const fetchStats = async () => {
+    // Check if the API URL and Key are set
+    if (!OJS_API_URL || !OJS_API_KEY) {
+      console.error('OJS API URL or Key is not configured.');
+      return;
+    }
+
+    // Set up the authenticated headers
+    const authHeaders = {
+      headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
+    };
+
+    try {
+      // --- We now need to make THREE separate API calls ---
+      
+      // 1. Get all published issues
+      const issuesRequest = axios.get(`${OJS_API_URL}/issues?isPublished=true`, authHeaders);
+      
+      // 2. Get all users with the "Author" role (ID 14)
+      const authorsRequest = axios.get(`${OJS_API_URL}/users?roleIds=14`, authHeaders);
+      
+      // 3. Get all users with the "Reviewer" role
+      // TODO: YOU MUST CHECK THIS ID!
+      // Go to OJS -> Settings -> Users & Roles -> Roles -> Edit "Reviewer" -> Check the URL bar for the ID.
+      // It is probably 15 or 17, but I will guess 15.
+      const reviewerRoleId = 16; 
+      const reviewersRequest = axios.get(`${OJS_API_URL}/users?roleIds=${reviewerRoleId}`, authHeaders);
+
+      // Wait for all three requests to finish
+      const [issuesResponse, authorsResponse, reviewersResponse] = await Promise.all([
+        issuesRequest,
+        authorsRequest,
+        reviewersRequest
+      ]);
+
+      // Get the total counts from the API responses
+      const totalIssues = issuesResponse.data.items.length;
+      const totalAuthors = authorsResponse.data.items.length;
+      const totalReviewers = reviewersResponse.data.items.length;
+
+      // Update the state for all three stats
+      setStats(prev =>
+        prev.map(item => {
+          if (item.label === "Issue Released") {
+            return { ...item, value: totalIssues.toString() };
+          }
+          if (item.label === "Authors") {
+            return { ...item, value: totalAuthors.toString() };
+          }
+          if (item.label === "Reviewers") {
+            return { ...item, value: totalReviewers.toString() };
+          }
+          return item; // Keep "Indexing" as is (it's a manual number)
+        })
+      );
+
+    } catch (err) {
+      console.error("Error fetching OJS statistics:", err);
+      // If the 'reviewersRequest' fails (e.g., ID 15 is wrong), it will log an error here.
+      // The other stats might still load.
+    }
+  };
+
+  fetchStats();
+}, []);
 const [stats, setStats] = useState([
   {
     icon: <Trophy size={36} className="text-orange-500" />,
