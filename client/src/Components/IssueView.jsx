@@ -9,6 +9,9 @@ import Foot from "./Footer";
 const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
 const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
+// This is the public-facing URL of your OJS installation
+const OJS_PUBLIC_URL = "https://api.ijrws.com/index.php/ijrws";
+
 export default function IssueView() {
   const { issueId } = useParams();
   const [issue, setIssue] = useState(null);
@@ -26,22 +29,25 @@ export default function IssueView() {
       }
       
       try {
-        // --- THIS IS THE FIX ---
-        // We are now using the correct 'Authorization' header
+        // This part is correct: uses Authorization header
         const res = await axios.get(
           `${OJS_API_URL}/issues/${issueId}`, 
           {
-            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } // <-- THE FIX
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
           }
         );
         
         // Save the issue data (like title)
         setIssue(res.data);
         
-        // --- THIS IS THE 2ND FIX ---
-        // We need to get papers from res.data.articles, just like on the CurrentIssue page
+        // This part is correct: gets papers from res.data.articles
         if (res.data.articles && res.data.articles.length > 0) {
-          const extractedPapers = res.data.articles.map(article => article.publications[0]);
+          // --- THIS IS THE FIX ---
+          // We must also store the parent submissionId to build the public link
+          const extractedPapers = res.data.articles.map(article => ({
+            ...article.publications[0], // This is the paper data
+            submissionId: article.id   // This is the parent ID we need for the link
+          }));
           setPapers(extractedPapers);
         } else {
           setPapers([]);
@@ -75,16 +81,14 @@ export default function IssueView() {
   }
 
   // Helper function to get the PDF URL from a paper's "galleys"
-  const getPdfUrl = (paper) => {
-    // Check for galleys array first
+  // This is now just finding the galley, the URL is built in the main return
+  const getPdfGalley = (paper) => {
     if (!paper.galleys || paper.galleys.length === 0) {
       return null;
     }
-    const pdfGalley = paper.galleys.find(
+    return paper.galleys.find(
       (galley) => galley.label === 'pdf' || galley.fileType === 'application/pdf'
     );
-    // Use the direct file URL
-    return (pdfGalley && pdfGalley.file) ? pdfGalley.file.url : null;
   };
 
   return (
@@ -110,7 +114,14 @@ export default function IssueView() {
         <div className="space-y-6">
           {papers.length > 0 ? (
             papers.map((paper) => {
-              const fileUrl = getPdfUrl(paper);
+              const pdfGalley = getPdfGalley(paper);
+              
+              // --- THIS IS THE FINAL FIX ---
+              // We build the PUBLIC download URL using the submissionId and galleyId
+              const fileUrl = (pdfGalley && paper.submissionId)
+                ? `${OJS_PUBLIC_URL}/article/download/${paper.submissionId}/${pdfGalley.id}`
+                : null;
+              
               return (
                 <div key={paper.id} className="bg-white p-6 rounded shadow-lg border border-gray-200">
                   <h2 
