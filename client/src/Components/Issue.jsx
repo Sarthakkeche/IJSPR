@@ -7,13 +7,16 @@ import Foot from '../Components/Footer';
 const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
 const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
+// This is the public-facing URL of your OJS installation
+const OJS_PUBLIC_URL = "https://api.ijrws.com/index.php/ijrws";
+
 const CurrentIssuePage = () => {
   const [papers, setPapers] = useState([]);
   const [issueTitle, setIssueTitle] = useState('Current Issue');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCurrentIssue = async () => {
+    const fetchCurrentIssuePapers = async () => {
       if (!OJS_API_URL || !OJS_API_KEY) {
         console.error('OJS API URL or Key is not configured.');
         setLoading(false);
@@ -21,21 +24,37 @@ const CurrentIssuePage = () => {
       }
 
       try {
-        // This is the only API call we need
-        const res = await axios.get(
-          `${OJS_API_URL}/issues/current`, 
+        // --- THIS IS THE NEW 2-STEP LOGIC ---
+
+        // Step 1: Get the current issue to find its ID
+        const currentIssueRes = await axios.get(
+          `${OJS_API_URL}/issues/current`,
           {
             headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
           }
         );
 
-        // Set the issue title
-        setIssueTitle((res.data.title && res.data.title.en) || 'Current Issue');
+        const currentIssue = currentIssueRes.data;
+        const currentIssueId = currentIssue.id;
+        
+        // Set the title from this first request
+        setIssueTitle((currentIssue.title && currentIssue.title.en) || 'Current Issue');
 
-        // The API sends an 'articles' array (which are submissions)
-        // Each article has a 'publications' array inside it. We extract the first publication from each.
-        if (res.data.articles && res.data.articles.length > 0) {
-          const extractedPapers = res.data.articles.map(article => article.publications[0]);
+        // Step 2: Use the ID to get the *full* issue details, including papers
+        const fullIssueRes = await axios.get(
+          `${OJS_API_URL}/issues/${currentIssueId}`,
+          {
+            headers: { 'Authorization': `Bearer ${OJS_API_KEY}` }
+          }
+        );
+
+        // This response will have the 'articles' array
+        if (fullIssueRes.data.articles && fullIssueRes.data.articles.length > 0) {
+          // We need to store the submissionId from the parent 'article' object
+          const extractedPapers = fullIssueRes.data.articles.map(article => ({
+            ...article.publications[0], // This is the paper data
+            submissionId: article.id   // This is the parent ID we need for the link
+          }));
           setPapers(extractedPapers);
         } else {
           setPapers([]);
@@ -44,7 +63,7 @@ const CurrentIssuePage = () => {
         setLoading(false);
         
       } catch (err) {
-        console.error('Error fetching current issue:', err);
+        console.error('Error fetching current issue papers:', err);
         setLoading(false);
         if (err.response && err.response.status === 404) {
           console.warn('No current issue found. Please publish an issue in OJS.');
@@ -52,7 +71,7 @@ const CurrentIssuePage = () => {
       }
     };
 
-    fetchCurrentIssue();
+    fetchCurrentIssuePapers();
   }, []);
 
   return (
@@ -72,14 +91,15 @@ const CurrentIssuePage = () => {
             <p className="col-span-full text-center text-gray-500">Loading...</p>
           ) : papers.length > 0 ? (
             papers.map(paper => {
-              // --- THIS IS THE FIX ---
               const pdfGalley = (paper.galleys || []).find(
                 galley => galley.label === 'pdf' || galley.fileType === 'application/pdf'
               );
               
-              // We now use pdfGalley.file.url (the direct download link)
-              // instead of pdfGalley.urlPublished (the broken viewer link)
-              const fileUrl = (pdfGalley && pdfGalley.file) ? pdfGalley.file.url : null;
+              // --- THIS IS THE FINAL FIX ---
+              // We build the PUBLIC download URL using the submissionId and galleyId
+              const fileUrl = (pdfGalley && paper.submissionId)
+                ? `${OJS_PUBLIC_URL}/article/download/${paper.submissionId}/${pdfGalley.id}`
+                : null;
 
               return (
                 <div key={paper.id} className="bg-white p-4 rounded shadow">
