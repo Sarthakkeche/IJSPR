@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://ijrws.com/</loc>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://ijrws.com/about</loc>
+  </url>
+  <url>
+    <loc>https://ijrws.com/Eboard</loc>
+  </url>
+  <url>
+    <loc>https://ijrws.com/archive</loc>
+  </url>
+  <url>
+    <loc>https://ijrws.com/currentpage</loc>
+  </url>
+  <url>
+    <loc>https://ijrws.com/submit</loc>
+  </url>
+   <url>
+    <loc>https://ijrws.com/status</loc>
+  </url>
+  <url>
+    <loc>https://ijrws.com/contact</loc>
+  </url>
+</urlset>
