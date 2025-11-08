@@ -495,7 +495,7 @@ const Home = () => {
         // --- FIX 2: You MUST check this ID! ---
         // Go to OJS -> Settings -> Users & Roles -> Roles -> Edit "Reviewer" -> Check the URL bar for the ID.
         // It is probably 15 or 17.
-        const reviewerRoleId = 15; // <-- TODO: CHECK THIS ID in OJS!
+        const reviewerRoleId = 16; // <-- TODO: CHECK THIS ID in OJS!
         const reviewersRequest = axios.get(`${OJS_API_URL}/users?roleIds=${reviewerRoleId}`, authHeaders);
 
         // Wait for all three requests to finish
