@@ -93,6 +93,8 @@ const SubmitManuscriptPage = () => {
           country: "IN",
           includeInBrowse: true,
           userGroupId: 14, // We confirmed this is 14 (Author)
+          // This is the FIX: It makes the first author from the form the "Primary Contact"
+          primaryContact: (index === 0) // We confirmed this is 14 (Author)
         }))
       };
       // --- END UPDATED DATA ---
