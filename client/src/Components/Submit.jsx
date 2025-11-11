@@ -56,61 +56,57 @@ const SubmitManuscriptPage = () => {
     setStatus("Submitting... please wait.");
 
     try {
-      // Step 1: Create submission
-      setStatus("Step 1/2: Creating submission...");
-      const submissionData = {
-        title: { en_US: form.paperTitle },
-        abstract: { en_US: form.abstract },
-        sectionId: 1, // Adjust section ID based on your OJS setup
-        authors: authors.map((a, i) => ({
-          givenName: { en_US: a.name },
-          email: a.email,
-          country: "IN",
-          userGroupId: 14, // Author group ID (verify from OJS)
-          primaryContact: i === 0,
-        })),
-      };
-
-      const submissionResponse = await axios.post(
-        `${OJS_API_URL}/submissions`,
-        submissionData,
-        { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
-      );
-
-      const submissionId = submissionResponse.data.id;
-      console.log("✅ Submission created:", submissionId);
-
-      // Step 2: Upload file (OJS 3.4+ requires fileStage as query param)
-      setStatus("Step 2/2: Uploading manuscript file...");
-
-      const fileData = new FormData();
-      fileData.append("file", paperFile);
-
-      await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`,
-        fileData,
-        {
-          headers: {
-            Authorization: `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setUniqueCode(submissionId);
-      setStatus("✅ Paper submitted successfully!");
-
-      // Reset fields
-      setForm({ paperTitle: "", abstract: "" });
-      setAuthors([{ name: "", email: "" }]);
-      setPaperFile(null);
-      e.target.reset();
-    } catch (error) {
-      console.error("Submission failed:", error.response?.data || error.message);
-      setStatus(`❌ Failed to submit paper. OJS said: "Check console for details."`);
-    } finally {
-      setIsSubmitting(false);
+  // Step 1: Create submission
+  const submissionResponse = await axios.post(
+    `${OJS_API_URL}/submissions`,
+    submissionData,
+    {
+      headers: {
+        Authorization: `Bearer ${OJS_API_KEY}`,
+        "Content-Type": "application/json",
+      },
     }
+  );
+
+  const submissionId = submissionResponse.data.id;
+  console.log("✅ Submission created:", submissionId);
+
+  // Step 2: Upload manuscript file
+  setStatus("Step 2/2: Uploading manuscript file...");
+
+  const fileData = new FormData();
+  fileData.append("file", paperFile);
+  fileData.append("fileStage", "SUBMISSION_FILE");
+  fileData.append("name", paperFile.name);
+
+  const uploadResponse = await axios.post(
+    `${OJS_API_URL}/submissions/${submissionId}/files`,
+    fileData,
+    {
+      headers: {
+        Authorization: `Bearer ${OJS_API_KEY}`,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  console.log("✅ File uploaded successfully:", uploadResponse.data);
+
+  setUniqueCode(submissionId);
+  setStatus("✅ Paper submitted successfully!");
+
+  // Reset fields
+  setForm({ paperTitle: "", abstract: "" });
+  setAuthors([{ name: "", email: "" }]);
+  setPaperFile(null);
+  e.target.reset();
+} catch (error) {
+  console.error("❌ Submission failed:", error.response?.data || error.message);
+  setStatus(`❌ Failed to submit paper. OJS said: "Check console for details."`);
+} finally {
+  setIsSubmitting(false);
+}
+
   };
 
   return (
