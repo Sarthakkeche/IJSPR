@@ -7,7 +7,6 @@ import axios from "axios";
 import paperImg from "../assets/paper.jpg";
 import uploadBg from "../assets/uplaod.jpg";
 
-// Get the API URL and Key from Vercel's Environment Variables
 const OJS_API_URL = import.meta.env.VITE_OJS_API_URL;
 const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
 
@@ -16,137 +15,127 @@ const SubmitManuscriptPage = () => {
     AOS.init({ duration: 1000 });
   }, []);
 
-  // State for the main form (title, abstract)
-  const [form, setForm] = useState({
-    paperTitle: "",
-    abstract: "",
-  });
-  
-  // State for the dynamic list of authors
-  const [authors, setAuthors] = useState([
-    { name: "", email: "" } // Start with one author object
-  ]);
-
+  const [form, setForm] = useState({ paperTitle: "", abstract: "" });
+  const [authors, setAuthors] = useState([{ name: "", email: "" }]);
   const [paperFile, setPaperFile] = useState(null);
   const [uniqueCode, setUniqueCode] = useState("");
   const [status, setStatus] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent double-clicks
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handles changes for the main form (title, abstract)
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Handles changes for the dynamic author inputs
-  // *** THIS FUNCTION IS NOW FIXED ***
-  const handleAuthorChange = (index, event) => { // Uses 'index'
-    const newAuthors = authors.map((author, i) => {
-      if (index === i) {
-        return { ...author, [event.target.name]: event.target.value };
-      }
-      return author;
-    });
+  const handleAuthorChange = (index, event) => {
+    const newAuthors = authors.map((author, i) =>
+      i === index ? { ...author, [event.target.name]: event.target.value } : author
+    );
     setAuthors(newAuthors);
   };
 
-  // Adds a new, empty author object to the list
-  const addAuthor = () => {
-    setAuthors([...authors, { name: "", email: "" }]);
+  const addAuthor = () => setAuthors([...authors, { name: "", email: "" }]);
+
+  const removeAuthor = (index) => {
+    if (authors.length <= 1) return;
+    setAuthors(authors.filter((_, i) => i !== index));
   };
 
-  // Removes an author from the list
-  // *** THIS FUNCTION IS NOW FIXED ***
-  const removeAuthor = (index) => { // Uses 'index'
-    if (authors.length <= 1) return; // Don't remove the last author
-    const newAuthors = authors.filter((_, i) => i !== index);
-    setAuthors(newAuthors);
-  };
-
-  // Handles the file input
   const handleFileChange = (e) => setPaperFile(e.target.files[0]);
 
-  // Handles the complete submission process
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; 
-
+    if (isSubmitting) return;
     if (!OJS_API_URL || !OJS_API_KEY) {
-      console.error('OJS API URL or Key is not configured.');
+      console.error("OJS API URL or Key not configured.");
       setStatus("❌ Configuration error. Please contact site admin.");
       return;
     }
 
     setIsSubmitting(true);
-    setStatus("Submitting... please wait.");
+    setStatus("Starting submission...");
 
     try {
-      // Step 1: Create the submission with ALL metadata
-      setStatus("Step 1/2: Submitting all article data...");
-
-      // Create the list of authors for the API
-      // *** THIS FUNCTION IS NOW FIXED ***
-      const authorsForApi = authors.map((author, index) => ({ // Uses 'index'
-        name: author.name,
-        email: author.email,
-        country: "IN",
-        includeInBrowse: true,
-        userGroupId: 14, // We confirmed this is 14 (Author)
-        primaryContact: (index === 0) // FIX: Uses 'index'
-      }));
-      
-      const submissionData = {
-        title: { en_US: form.paperTitle },
-        abstract: { en_US: form.abstract },
-        sectionId: 1, // We confirmed this is 1
-        authors: authorsForApi // Use the new array
-      };
-
-      const submissionResponse = await axios.post(
+      // STEP 1: Create an empty submission
+      setStatus("Step 1/4: Creating submission...");
+      const createSubmissionRes = await axios.post(
         `${OJS_API_URL}/submissions`,
-        submissionData,
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
+        {
+          contextId: 1, // your OJS journal context id
+          sectionId: 1, // your journal's section id
+          locale: "en_US",
+        },
+        { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
       );
 
-      const submissionId = submissionResponse.data.id;
+      const submissionId = createSubmissionRes.data.id;
+      const publicationId = createSubmissionRes.data.currentPublicationId;
 
-      // Step 2: Upload the manuscript file
-      setStatus("Step 2/2: Uploading manuscript file...");
-      
-      const fileData = new FormData();
-      fileData.append('file', paperFile);
-      fileData.append('fileStage', '2'); // '2' = Submission File
+      // STEP 2: Upload manuscript file
+      setStatus("Step 2/4: Uploading manuscript file...");
+      const formData = new FormData();
+      formData.append("file", paperFile);
+      formData.append("fileStage", "SUBMISSION_FILE");
 
       await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files`,
-        fileData,
-        { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
+        `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${OJS_API_KEY}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      // All steps done!
+      // STEP 3: Update publication metadata (title & abstract)
+      setStatus("Step 3/4: Adding title and abstract...");
+      await axios.put(
+        `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}`,
+        {
+          title: { en_US: form.paperTitle },
+          abstract: { en_US: form.abstract },
+        },
+        { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
+      );
+
+      // STEP 4: Add authors (contributors)
+      setStatus("Step 4/4: Adding author details...");
+      for (let i = 0; i < authors.length; i++) {
+        const author = authors[i];
+        const nameParts = author.name.split(" ");
+        const givenName = nameParts.slice(0, -1).join(" ") || author.name;
+        const familyName = nameParts.slice(-1).join(" ") || "";
+
+        const authorPayload = {
+          [`givenName[en_US]`]: givenName,
+          [`familyName[en_US]`]: familyName,
+          [`preferredPublicName[en_US]`]: author.name,
+          email: author.email,
+          country: "IN",
+          [`affiliation[en_US]`]: "Independent Researcher",
+          userGroupId: 14, // Author group ID
+          includeInBrowse: true,
+          primaryContact: i === 0, // first author = primary contact
+        };
+
+        await axios.post(
+          `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}/contributors`,
+          authorPayload,
+          { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
+        );
+      }
+
+      // ✅ Success
       setUniqueCode(submissionId);
       setStatus("✅ Paper submitted successfully!");
       setForm({ paperTitle: "", abstract: "" });
       setAuthors([{ name: "", email: "" }]);
       setPaperFile(null);
-      e.target.reset(); // Resets the file input field
-      setIsSubmitting(false);
-
+      e.target.reset();
     } catch (error) {
       console.error("Submission failed:", error.response ? error.response.data : error.message);
-      
-      let ojsErrorMessage = "Check console for details.";
-      if (error.response && error.response.data) {
-         const errorData = error.response.data;
-         if (errorData.errorMessage) {
-            ojsErrorMessage = errorData.errorMessage;
-         } else {
-            const errorFields = Object.keys(errorData);
-            if (errorFields.length > 0) {
-              const firstErrorField = errorFields[0];
-              ojsErrorMessage = `${firstErrorField}: ${errorData[firstErrorField][0]}`;
-            }
-         }
-      }
-      setStatus(`❌ Failed to submit paper. OJS said: "${ojsErrorMessage}"`);
+      let msg = "Check console for details.";
+      if (error.response?.data?.errorMessage) msg = error.response.data.errorMessage;
+      setStatus(`❌ Failed to submit paper. OJS said: "${msg}"`);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -169,59 +158,20 @@ const SubmitManuscriptPage = () => {
             Submit Your <span className="text-orange-400">Manuscript</span>
           </h1>
           <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
-            Upload your research paper and get a unique tracking code to
-            check its status anytime.
+            Upload your research paper and get a unique tracking code to check its status anytime.
           </p>
-        </div>
-      </section>
-
-      {/* Important Info Section */}
-      <section className="px-6 md:px-20 py-10">
-        <div
-          className="relative bg-white text-gray-800 p-6 rounded-xl shadow-lg border-4 animate-borderGlow"
-          data-aos="zoom-in"
-        >
-          <h2 className="text-xl font-bold text-red-600 mb-3">
-            ⚠️ Important Submission Guidelines
-          </h2>
-          <p className="mb-4">
-            For publishing your paper in <b>IJRWS</b>, you must submit your
-            manuscript strictly in the{" "}
-            <span className="font-semibold text-blue-700">
-              official journal template
-            </span>
-            . Submissions not following the format will be{" "}
-            <span className="font-bold text-red-600">rejected</span>.
-             <a href="#" className="text-green-400"> Click here for more Information</a>
-          </p>
-          <a
-            href="/IJRWS_Template.docx"
-            download
-            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-purple-700 transition"
-          >
-            ⬇️ Download Template
-          </a>
         </div>
       </section>
 
       {/* Form Section */}
       <section className="py-16 bg-white px-6 md:px-20">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
-          {/* Submit Form */}
-          <form
-            className="space-y-6"
-            data-aos="fade-right"
-            onSubmit={handleSubmit}
-          >
-            <h2 className="text-3xl font-bold text-blue-800">
-              Upload Manuscript
-            </h2>
+          <form className="space-y-6" data-aos="fade-right" onSubmit={handleSubmit}>
+            <h2 className="text-3xl font-bold text-blue-800">Upload Manuscript</h2>
 
-            {/* Paper Title Input */}
+            {/* Paper Title */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">
-                Paper Title
-              </label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">Paper Title</label>
               <input
                 type="text"
                 name="paperTitle"
@@ -233,20 +183,16 @@ const SubmitManuscriptPage = () => {
               />
             </div>
 
-            {/* --- DYNAMIC AUTHOR SECTION --- */}
+            {/* Authors */}
             <div className="space-y-4 rounded-lg border border-gray-300 p-4">
-              <label className="block text-lg font-semibold text-gray-700">
-                Authors
-              </label>
-              {/* Uses 'index' here */}
+              <label className="block text-lg font-semibold text-gray-700">Authors</label>
               {authors.map((author, index) => (
                 <div key={index} className="p-2 border rounded-md relative">
-                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{index + 1} {index === 0 && "(Primary Contact)"}</p>
-                  {/* Author Name Input */}
+                  <p className="font-medium text-sm text-gray-500 mb-2">
+                    Author #{index + 1} {index === 0 && "(Primary Contact)"}
+                  </p>
                   <div className="mb-2">
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">
-                      Author Name
-                    </label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">Name</label>
                     <input
                       type="text"
                       name="name"
@@ -257,22 +203,18 @@ const SubmitManuscriptPage = () => {
                       required
                     />
                   </div>
-                  {/* Author Email Input */}
                   <div>
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">
-                      Author Email
-                    </label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">Email</label>
                     <input
                       type="email"
                       name="email"
                       value={author.email}
                       onChange={(e) => handleAuthorChange(index, e)}
-                      placeholder="Enter author's email (required)"
+                      placeholder="Enter author's email"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
                       required
                     />
                   </div>
-                  {/* Remove Button */}
                   {index > 0 && (
                     <button
                       type="button"
@@ -284,7 +226,6 @@ const SubmitManuscriptPage = () => {
                   )}
                 </div>
               ))}
-              {/* Add Author Button */}
               <button
                 type="button"
                 onClick={addAuthor}
@@ -293,14 +234,10 @@ const SubmitManuscriptPage = () => {
                 + Add Another Author
               </button>
             </div>
-            {/* --- END DYNAMIC AUTHOR SECTION --- */}
 
-
-            {/* Abstract Textarea */}
+            {/* Abstract */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">
-                Abstract
-              </label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">Abstract</label>
               <textarea
                 name="abstract"
                 value={form.abstract}
@@ -312,7 +249,7 @@ const SubmitManuscriptPage = () => {
               />
             </div>
 
-            {/* File Input */}
+            {/* File Upload */}
             <div>
               <label className="block mb-2 text-sm font-semibold text-gray-600">
                 Upload Paper (PDF or .docx)
@@ -322,17 +259,19 @@ const SubmitManuscriptPage = () => {
                 name="paperfile"
                 onChange={handleFileChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300"
-                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept=".pdf,.doc,.docx"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className={`w-full text-white px-6 py-3 rounded-lg transition font-semibold ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-700 hover:bg-blue-800'}`}
+              className={`w-full text-white px-6 py-3 rounded-lg transition font-semibold ${
+                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800"
+              }`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting, Please Wait...' : 'Submit Paper'}
+              {isSubmitting ? "Submitting, Please Wait..." : "Submit Paper"}
             </button>
 
             <p className="text-sm text-gray-600 mt-2">{status}</p>
@@ -349,12 +288,7 @@ const SubmitManuscriptPage = () => {
             )}
           </form>
 
-          <img
-            src={paperImg}
-            alt="Upload Illustration"
-            className="w-full max-w-md mx-auto"
-            data-aos="fade-left"
-          />
+          <img src={paperImg} alt="Upload Illustration" className="w-full max-w-md mx-auto" data-aos="fade-left" />
         </div>
       </section>
 
