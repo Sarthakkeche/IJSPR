@@ -37,10 +37,10 @@ const SubmitManuscriptPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   // Handles changes for the dynamic author inputs
-  // Uses 'authorIndex' to avoid conflicts
-  const handleAuthorChange = (authorIndex, event) => {
+  // *** THIS FUNCTION IS NOW FIXED ***
+  const handleAuthorChange = (index, event) => { // Uses 'index'
     const newAuthors = authors.map((author, i) => {
-      if (authorIndex === i) {
+      if (index === i) {
         return { ...author, [event.target.name]: event.target.value };
       }
       return author;
@@ -54,10 +54,10 @@ const SubmitManuscriptPage = () => {
   };
 
   // Removes an author from the list
-  // Uses 'authorIndex' to avoid conflicts
-  const removeAuthor = (authorIndex) => {
+  // *** THIS FUNCTION IS NOW FIXED ***
+  const removeAuthor = (index) => { // Uses 'index'
     if (authors.length <= 1) return; // Don't remove the last author
-    const newAuthors = authors.filter((_, i) => i !== authorIndex);
+    const newAuthors = authors.filter((_, i) => i !== index);
     setAuthors(newAuthors);
   };
 
@@ -83,14 +83,14 @@ const SubmitManuscriptPage = () => {
       setStatus("Step 1/2: Submitting all article data...");
 
       // Create the list of authors for the API
-      // This includes the 'primaryContact' fix
-      const authorsForApi = authors.map((author, authorIndex) => ({ // Uses 'authorIndex'
+      // *** THIS FUNCTION IS NOW FIXED ***
+      const authorsForApi = authors.map((author, index) => ({ // Uses 'index'
         name: author.name,
         email: author.email,
         country: "IN",
         includeInBrowse: true,
         userGroupId: 14, // We confirmed this is 14 (Author)
-        primaryContact: (authorIndex === 0) // FIX: Uses 'authorIndex'
+        primaryContact: (index === 0) // FIX: Uses 'index'
       }));
       
       const submissionData = {
@@ -238,10 +238,10 @@ const SubmitManuscriptPage = () => {
               <label className="block text-lg font-semibold text-gray-700">
                 Authors
               </label>
-              {/* Uses 'authorIndex' here */}
-              {authors.map((author, authorIndex) => (
-                <div key={authorIndex} className="p-2 border rounded-md relative">
-                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{authorIndex + 1} {authorIndex === 0 && "(Primary Contact)"}</p>
+              {/* Uses 'index' here */}
+              {authors.map((author, index) => (
+                <div key={index} className="p-2 border rounded-md relative">
+                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{index + 1} {index === 0 && "(Primary Contact)"}</p>
                   {/* Author Name Input */}
                   <div className="mb-2">
                     <label className="block mb-1 text-xs font-semibold text-gray-600">
@@ -251,7 +251,7 @@ const SubmitManuscriptPage = () => {
                       type="text"
                       name="name"
                       value={author.name}
-                      onChange={(e) => handleAuthorChange(authorIndex, e)}
+                      onChange={(e) => handleAuthorChange(index, e)}
                       placeholder="Enter full name"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
                       required
@@ -266,17 +266,17 @@ const SubmitManuscriptPage = () => {
                       type="email"
                       name="email"
                       value={author.email}
-                      onChange={(e) => handleAuthorChange(authorIndex, e)}
+                      onChange={(e) => handleAuthorChange(index, e)}
                       placeholder="Enter author's email (required)"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
                       required
                     />
                   </div>
                   {/* Remove Button */}
-                  {authorIndex > 0 && (
+                  {index > 0 && (
                     <button
                       type="button"
-                      onClick={() => removeAuthor(authorIndex)}
+                      onClick={() => removeAuthor(index)}
                       className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold"
                     >
                       &times;
