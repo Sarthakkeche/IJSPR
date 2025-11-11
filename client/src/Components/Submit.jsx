@@ -73,7 +73,7 @@ try {
   await axios.post(
     `${OJS_API_URL}/submissions/${submissionId}/participants`,
     {
-      userId: 1, // 👈 replace with your admin user_id from OJS database
+      userId: 3, // 👈 replace with your admin user_id from OJS database
       userGroupId: 14, // Author group ID
     },
     {
