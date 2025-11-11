@@ -124,63 +124,93 @@ const SubmitManuscriptPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
+  e.preventDefault();
+  if (isSubmitting) return;
 
-    if (!OJS_API_URL || !OJS_API_KEY) {
-      setStatus("❌ Configuration error. Missing API URL or API KEY.");
-      return;
-    }
-    if (!paperFile) {
-      setStatus("❌ Please choose a file to upload.");
-      return;
-    }
+  if (!OJS_API_URL || !OJS_API_KEY) {
+    setStatus("❌ Missing OJS API configuration.");
+    return;
+  }
+  if (!paperFile) {
+    setStatus("❌ Please select a file.");
+    return;
+  }
 
-    setIsSubmitting(true);
-    setStatus("Submitting... please wait.");
+  setIsSubmitting(true);
+  setStatus("Submitting... please wait.");
 
-    try {
-      // Step 1: Create submission
-      setStatus("Step 1/2: Creating submission...");
-      const submissionData = buildSubmissionData();
+  try {
+    // Step 1: Create submission
+    setStatus("Step 1/2: Creating submission...");
+    const submissionData = {
+      locale: "en_US",
+      sectionId: OJS_SECTION_ID,
+      title: { en_US: form.paperTitle.trim() },
+      abstract: { en_US: form.abstract.trim() },
+      authors: authors.map((a, i) => ({
+        givenName: { en_US: a.name.trim() },
+        email: a.email.trim(),
+        country: "IN",
+        userGroupId: OJS_AUTHOR_GROUP_ID,
+        primaryContact: i === 0,
+      })),
+    };
 
-      const createRes = await axios.post(
-        `${OJS_API_URL}/submissions`,
-        submissionData,
-        {
-          headers: {
-            Authorization: `Bearer ${OJS_API_KEY}`, // capital B is REQUIRED
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        }
-      );
+    const submissionResponse = await axios.post(
+      `${OJS_API_URL}/submissions`,
+      submissionData,
+      {
+        headers: {
+          Authorization: `Bearer ${OJS_API_KEY}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
 
-      const submissionId = createRes.data?.id;
-      if (!submissionId) throw new Error("Submission created but no ID returned.");
-      console.log("✅ Submission created:", submissionId);
+    const submissionId = submissionResponse.data.id;
+    console.log("✅ Submission created:", submissionId);
 
-      // Step 2: Upload file
-      setStatus("Step 2/2: Uploading manuscript file...");
-      await uploadManuscript(submissionId);
+    // Step 2: Upload file
+    setStatus("Step 2/2: Uploading manuscript file...");
 
-      // Done
-      setUniqueCode(submissionId);
-      setStatus("✅ Paper submitted successfully!");
+    const fileData = new FormData();
+    fileData.append("file", paperFile, paperFile.name);
+    fileData.append("name", paperFile.name);
+    fileData.append("genreId", "1"); // usually required
+    fileData.append("mimetype", paperFile.type || "application/octet-stream");
 
-      // Reset form
-      setForm({ paperTitle: "", abstract: "" });
-      setAuthors([{ name: "", email: "" }]);
-      setPaperFile(null);
-      e.target.reset();
-    } catch (err) {
-      console.error("❌ Submission failed:", err?.response?.data || err);
-      const msg = parseOjsError(err);
-      setStatus(`❌ Failed to submit paper. OJS said: "${msg}"`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const uploadUrl = `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`;
+
+    const uploadResponse = await axios.post(uploadUrl, fileData, {
+      headers: {
+        "X-Api-Key": OJS_API_KEY,
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    });
+
+    console.log("✅ File uploaded successfully:", uploadResponse.data);
+
+    setUniqueCode(submissionId);
+    setStatus("✅ Paper submitted successfully!");
+
+    // Reset form
+    setForm({ paperTitle: "", abstract: "" });
+    setAuthors([{ name: "", email: "" }]);
+    setPaperFile(null);
+    e.target.reset();
+  } catch (error) {
+    console.error("❌ Submission failed:", error.response?.data || error.message);
+    const msg =
+      error.response?.data?.errorMessage ||
+      error.response?.data?.message ||
+      error.message;
+    setStatus(`❌ Failed: ${msg}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
