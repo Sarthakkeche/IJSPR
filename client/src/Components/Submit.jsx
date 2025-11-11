@@ -7,7 +7,7 @@ import Footer from "./Footer";
 import paperImg from "../assets/paper.jpg";
 import uploadBg from "../assets/uplaod.jpg";
 
-// === ENV ===
+// ===== ENV =====
 const OJS_API_URL =
   import.meta.env.VITE_OJS_API_URL || import.meta.env.VITE_API_URL;
 const OJS_API_KEY = import.meta.env.VITE_OJS_API_KEY;
@@ -15,6 +15,11 @@ const OJS_SECTION_ID = Number(import.meta.env.VITE_OJS_SECTION_ID ?? 1);
 const OJS_AUTHOR_GROUP_ID = Number(
   import.meta.env.VITE_OJS_AUTHOR_GROUP_ID ?? 14
 );
+
+// File stage constants used by OJS internally
+const FILE_STAGE_MAP = {
+  SUBMISSION_FILE: 2, // safest default for manuscript upload
+};
 
 const SubmitManuscriptPage = () => {
   useEffect(() => {
@@ -37,15 +42,10 @@ const SubmitManuscriptPage = () => {
     setAuthors(updated);
   };
 
-  const addAuthor = () =>
-    setAuthors((arr) => [...arr, { name: "", email: "" }]);
-
+  const addAuthor = () => setAuthors((arr) => [...arr, { name: "", email: "" }]);
   const removeAuthor = (index) => {
-    if (authors.length > 1) {
-      setAuthors((arr) => arr.filter((_, i) => i !== index));
-    }
+    if (authors.length > 1) setAuthors((arr) => arr.filter((_, i) => i !== index));
   };
-
   const handleFileChange = (e) => setPaperFile(e.target.files[0]);
 
   const parseOjsError = (err) => {
@@ -55,12 +55,72 @@ const SubmitManuscriptPage = () => {
       if (d.errorMessage) return d.errorMessage;
       if (d.error?.message) return d.error.message;
       if (d.message) return d.message;
-      // first field error, if present
       const k = Object.keys(d)[0];
       if (k && Array.isArray(d[k]) && d[k][0]) return `${k}: ${d[k][0]}`;
-      return JSON.stringify(d);
+      try {
+        return JSON.stringify(d);
+      } catch {
+        return "Unknown server error";
+      }
     }
     return err?.message || "Unknown error";
+  };
+
+  // Build the submission JSON payload OJS expects
+  const buildSubmissionData = () => ({
+    locale: "en_US",
+    sectionId: OJS_SECTION_ID,
+    title: { en_US: form.paperTitle.trim() },
+    abstract: { en_US: form.abstract.trim() },
+    authors: authors.map((a, i) => ({
+      givenName: { en_US: a.name.trim() },
+      email: a.email.trim(),
+      country: "IN",
+      userGroupId: OJS_AUTHOR_GROUP_ID, // “Author” group id
+      primaryContact: i === 0,
+    })),
+  });
+
+  // Upload file once; send both fileStageId (numeric) and fileStage (string)
+  // Include a genreId (1 = Article Text on most installs). Auto-retry with 2 if needed.
+  const uploadManuscript = async (submissionId) => {
+    const tryUpload = async (genreId) => {
+      const fd = new FormData();
+      fd.append("file", paperFile, paperFile.name);
+      fd.append("name", paperFile.name);
+      fd.append("fileStageId", String(FILE_STAGE_MAP.SUBMISSION_FILE)); // numeric
+      fd.append("fileStage", "SUBMISSION_FILE"); // string (covers both expectations)
+      fd.append("genreId", String(genreId)); // “Article Text” is commonly 1
+
+      const res = await axios.post(
+        `${OJS_API_URL}/submissions/${submissionId}/files`,
+        fd,
+        {
+          headers: {
+            Authorization: `Bearer ${OJS_API_KEY}`,
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json",
+          },
+        }
+      );
+      return res;
+    };
+
+    try {
+      return await tryUpload(1);
+    } catch (err) {
+      // If server complains about genre or stage, try a second common genre id
+      const msg = parseOjsError(err) || "";
+      if (
+        /genre/i.test(msg) ||
+        /noGenre/i.test(msg) ||
+        /file stage/i.test(msg) ||
+        /noFileStage/i.test(msg)
+      ) {
+        return await tryUpload(2);
+      }
+      throw err;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -80,29 +140,16 @@ const SubmitManuscriptPage = () => {
     setStatus("Submitting... please wait.");
 
     try {
-      // === Step 1: Create the submission with metadata ===
+      // Step 1: Create submission
       setStatus("Step 1/2: Creating submission...");
-
-      const submissionData = {
-        locale: "en_US",
-        sectionId: OJS_SECTION_ID,
-        title: { en_US: form.paperTitle.trim() },
-        abstract: { en_US: form.abstract.trim() },
-        authors: authors.map((a, i) => ({
-          givenName: { en_US: a.name.trim() }, // full name is fine here
-          email: a.email.trim(),
-          country: "IN",
-          userGroupId: OJS_AUTHOR_GROUP_ID, // Author group
-          primaryContact: i === 0,
-        })),
-      };
+      const submissionData = buildSubmissionData();
 
       const createRes = await axios.post(
         `${OJS_API_URL}/submissions`,
         submissionData,
         {
           headers: {
-            Authorization: `Bearer ${OJS_API_KEY}`, // Bearer MUST be capital B
+            Authorization: `Bearer ${OJS_API_KEY}`, // capital B is REQUIRED
             "Content-Type": "application/json",
             Accept: "application/json",
           },
@@ -110,34 +157,14 @@ const SubmitManuscriptPage = () => {
       );
 
       const submissionId = createRes.data?.id;
-      if (!submissionId) {
-        throw new Error("Submission created but no ID returned by OJS.");
-      }
+      if (!submissionId) throw new Error("Submission created but no ID returned.");
       console.log("✅ Submission created:", submissionId);
 
-      // === Step 2: Upload the manuscript file ===
+      // Step 2: Upload file
       setStatus("Step 2/2: Uploading manuscript file...");
+      await uploadManuscript(submissionId);
 
-      const fd = new FormData();
-      fd.append("file", paperFile, paperFile.name);
-      // IMPORTANT for OJS 3.4+: send fileStage IN THE BODY (form-data)
-      fd.append("fileStage", "SUBMISSION_FILE");
-      // optional but nice:
-      fd.append("name", paperFile.name);
-
-      await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-        }
-      );
-
-      // === Done ===
+      // Done
       setUniqueCode(submissionId);
       setStatus("✅ Paper submitted successfully!");
 
@@ -169,10 +196,10 @@ const SubmitManuscriptPage = () => {
         }}
       >
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold" data-aos="fade-down">
+          <h1 className="text-4xl md:text-5xl font-bold">
             Submit Your <span className="text-orange-400">Manuscript</span>
           </h1>
-          <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
+          <p className="mt-4 text-lg max-w-2xl mx-auto">
             Upload your research paper and get a unique tracking code to check its status anytime.
           </p>
         </div>
@@ -180,10 +207,7 @@ const SubmitManuscriptPage = () => {
 
       {/* Info */}
       <section className="px-6 md:px-20 py-10">
-        <div
-          className="relative bg-white text-gray-800 p-6 rounded-xl shadow-lg border-4"
-          data-aos="zoom-in"
-        >
+        <div className="relative bg-white text-gray-800 p-6 rounded-xl shadow-lg border-4">
           <h2 className="text-xl font-bold text-red-600 mb-3">
             ⚠️ Important Submission Guidelines
           </h2>
@@ -204,7 +228,7 @@ const SubmitManuscriptPage = () => {
       {/* Form */}
       <section className="py-16 bg-white px-6 md:px-20">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
-          <form className="space-y-6" data-aos="fade-right" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <h2 className="text-3xl font-bold text-blue-800">Upload Manuscript</h2>
 
             {/* Title */}
@@ -233,7 +257,6 @@ const SubmitManuscriptPage = () => {
                   <p className="font-medium text-sm text-gray-500 mb-2">
                     Author #{index + 1} {index === 0 && "(Primary Contact)"}
                   </p>
-
                   <div className="mb-2">
                     <label className="block mb-1 text-xs font-semibold text-gray-600">
                       Author Name
@@ -248,7 +271,6 @@ const SubmitManuscriptPage = () => {
                       required
                     />
                   </div>
-
                   <div>
                     <label className="block mb-1 text-xs font-semibold text-gray-600">
                       Author Email
@@ -263,7 +285,6 @@ const SubmitManuscriptPage = () => {
                       required
                     />
                   </div>
-
                   {index > 0 && (
                     <button
                       type="button"
@@ -275,7 +296,6 @@ const SubmitManuscriptPage = () => {
                   )}
                 </div>
               ))}
-
               <button
                 type="button"
                 onClick={addAuthor}
@@ -345,7 +365,6 @@ const SubmitManuscriptPage = () => {
             src={paperImg}
             alt="Upload Illustration"
             className="w-full max-w-md mx-auto"
-            data-aos="fade-left"
           />
         </div>
       </section>
