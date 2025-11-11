@@ -16,28 +16,27 @@ const SubmitManuscriptPage = () => {
     AOS.init({ duration: 1000 });
   }, []);
 
-  // --- NEW STATE ---
-  // We've separated authors into its own state array
+  // State for the main form (title, abstract)
   const [form, setForm] = useState({
     paperTitle: "",
     abstract: "",
   });
+  
+  // State for the dynamic list of authors
   const [authors, setAuthors] = useState([
     { name: "", email: "" } // Start with one author object
   ]);
-  // --- END NEW STATE ---
 
   const [paperFile, setPaperFile] = useState(null);
   const [uniqueCode, setUniqueCode] = useState("");
   const [status, setStatus] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent double-clicks
 
-  // This function now handles the main form (title, abstract)
+  // Handles changes for the main form (title, abstract)
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // --- NEW FUNCTIONS FOR AUTHORS ---
-  // This function handles changes within the authors array
+  // Handles changes for the dynamic author inputs
   const handleAuthorChange = (index, event) => {
     const newAuthors = authors.map((author, i) => {
       if (index === i) {
@@ -48,25 +47,25 @@ const SubmitManuscriptPage = () => {
     setAuthors(newAuthors);
   };
 
-  // This adds a new, empty author object to the array
+  // Adds a new, empty author object to the list
   const addAuthor = () => {
     setAuthors([...authors, { name: "", email: "" }]);
   };
 
-  // This removes an author by their index
+  // Removes an author from the list
   const removeAuthor = (index) => {
-    // Don't allow removing the last author
-    if (authors.length <= 1) return;
+    if (authors.length <= 1) return; // Don't remove the last author
     const newAuthors = authors.filter((_, i) => i !== index);
     setAuthors(newAuthors);
   };
-  // --- END NEW FUNCTIONS ---
 
+  // Handles the file input
   const handleFileChange = (e) => setPaperFile(e.target.files[0]);
 
+  // Handles the complete submission process
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting) return; 
 
     if (!OJS_API_URL || !OJS_API_KEY) {
       console.error('OJS API URL or Key is not configured.');
@@ -78,59 +77,63 @@ const SubmitManuscriptPage = () => {
     setStatus("Submitting... please wait.");
 
     try {
+      // --- OJS Submission is a 2-Step Process ---
+
       // Step 1: Create the submission with ALL metadata
       setStatus("Step 1/2: Submitting all article data...");
 
-      // --- UPDATED SUBMISSION DATA ---
-      // We now map over the authors array to create the authors list
+      // Create the list of authors for the API
+      // This includes the 'primaryContact' fix
+      const authorsForApi = authors.map((author, index) => ({
+        name: author.name,
+        email: author.email,
+        country: "IN",
+        includeInBrowse: true,
+        userGroupId: 14, // We confirmed this is 14 (Author)
+        primaryContact: (index === 0) // FIX: Makes the first author the primary contact
+      }));
+      
       const submissionData = {
         title: { en_US: form.paperTitle },
         abstract: { en_US: form.abstract },
         sectionId: 1, // We confirmed this is 1
-        authors: authors.map(author => ({
-          name: author.name,
-          email: author.email,
-          country: "IN",
-          includeInBrowse: true,
-          userGroupId: 14, // We confirmed this is 14 (Author)
-          // This is the FIX: It makes the first author from the form the "Primary Contact"
-          primaryContact: (index === 0) // We confirmed this is 14 (Author)
-        }))
+        authors: authorsForApi // Use the new array
       };
-      // --- END UPDATED DATA ---
 
       const submissionResponse = await axios.post(
         `${OJS_API_URL}/submissions`,
         submissionData,
+        // FIX: Use 'Authorization' header
         { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
       );
 
       const submissionId = submissionResponse.data.id;
 
-      // Step 2: Upload the manuscript file
+      // Step 2: Upload the manuscript file to the new submission
       setStatus("Step 2/2: Uploading manuscript file...");
       
       const fileData = new FormData();
       fileData.append('file', paperFile);
-      fileData.append('fileStage', '2'); // '2' = Submission File
+      fileData.append('fileStage', '2'); // FIX: '2' = Submission File
 
       await axios.post(
         `${OJS_API_URL}/submissions/${submissionId}/files`,
         fileData,
+        // FIX: Use 'Authorization' header
         { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
       );
 
       // All steps done!
       setUniqueCode(submissionId);
       setStatus("✅ Paper submitted successfully!");
-      // Reset the form
       setForm({ paperTitle: "", abstract: "" });
-      setAuthors([{ name: "", email: "" }]); // Reset to one author
+      setAuthors([{ name: "", email: "" }]);
       setPaperFile(null);
-      e.target.reset();
+      e.target.reset(); // Resets the file input field
       setIsSubmitting(false);
 
     } catch (error) {
+      // This will give a specific error message
       console.error("Submission failed:", error.response ? error.response.data : error.message);
       
       let ojsErrorMessage = "Check console for details.";
@@ -240,7 +243,7 @@ const SubmitManuscriptPage = () => {
               </label>
               {authors.map((author, index) => (
                 <div key={index} className="p-2 border rounded-md relative">
-                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{index + 1}</p>
+                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{index + 1} {index === 0 && "(Primary Contact)"}</p>
                   {/* Author Name Input */}
                   <div className="mb-2">
                     <label className="block mb-1 text-xs font-semibold text-gray-600">
