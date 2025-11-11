@@ -205,14 +205,16 @@ const SubmitManuscriptPage = () => {
       for (let i = 0; i < authors.length; i++) {
         const author = authors[i];
         
-        const authorPayload = {
-          name: author.name.trim(), // OJS API for contributors is simpler
-          email: author.email.trim(),
-          country: "IN",
-          userGroupId: OJS_AUTHOR_GROUP_ID, // Use the variable from the top
-          includeInBrowse: true,
-          primaryContact: i === 0, // first author = primary contact
-        };
+       const authorPayload = {
+  givenName: { en_US: author.name.trim() }, // ✅ localized name required by OJS
+  familyName: { en_US: "" }, // optional but prevents errors
+  email: author.email.trim(),
+  country: "IN",
+  userGroupId: OJS_AUTHOR_GROUP_ID,
+  includeInBrowse: true,
+  primaryContact: i === 0,
+};
+
 
         await axios.post(
           `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}/contributors`,
