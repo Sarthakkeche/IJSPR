@@ -66,7 +66,29 @@ const SubmitManuscriptPage = () => {
         }
       );
       const submissionId = createSubmissionRes.data.id;
-      const publicationId = createSubmissionRes.data.currentPublicationId;
+const publicationId = createSubmissionRes.data.currentPublicationId;
+
+// ✅ Add admin as a participant before upload
+try {
+  await axios.post(
+    `${OJS_API_URL}/submissions/${submissionId}/participants`,
+    {
+      userId: 1, // 👈 replace with your admin user_id from OJS database
+      userGroupId: 14, // Author group ID
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${OJS_API_KEY}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  );
+  console.log("Admin added as participant.");
+} catch (err) {
+  console.warn("Participant add failed (may already exist):", err.message);
+}
+
       console.log("✅ Submission created:", submissionId);
 
       // STEP 2 — Upload manuscript file
