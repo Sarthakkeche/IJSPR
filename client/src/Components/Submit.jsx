@@ -55,15 +55,26 @@ const SubmitManuscriptPage = () => {
     try {
       // STEP 1: Create an empty submission
       setStatus("Step 1/4: Creating submission...");
-      const createSubmissionRes = await axios.post(
-        `${OJS_API_URL}/submissions`,
-        {
-          contextId: 1, // your OJS journal context id
-          sectionId: 1, // your journal's section id
-          locale: "en_US",
-        },
-        { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
-      );
+      const payload = {
+  contextId: 1, // Confirm this ID from your OJS database (see below)
+  sectionId: 1,
+  locale: "en_US",
+};
+
+const createSubmissionRes = await axios.post(
+  `${OJS_API_URL}/submissions`,
+  payload,
+  {
+    headers: {
+      "Authorization": `Bearer ${OJS_API_KEY}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+  }
+);
+
+console.log("✅ Submission created:", createSubmissionRes.data);
+
 
       const submissionId = createSubmissionRes.data.id;
       const publicationId = createSubmissionRes.data.currentPublicationId;
