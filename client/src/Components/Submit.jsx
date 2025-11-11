@@ -22,16 +22,18 @@ const SubmitManuscriptPage = () => {
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleAuthorChange = (index, event) => {
+  const handleAuthorChange = (index, e) => {
     const newAuthors = authors.map((author, i) =>
-      i === index ? { ...author, [event.target.name]: event.target.value } : author
+      i === index ? { ...author, [e.target.name]: e.target.value } : author
     );
     setAuthors(newAuthors);
   };
 
-  const addAuthor = () => setAuthors([...authors, { name: "", email: "" }]);
+  const addAuthor = () =>
+    setAuthors([...authors, { name: "", email: "" }]);
 
   const removeAuthor = (index) => {
     if (authors.length <= 1) return;
@@ -44,7 +46,6 @@ const SubmitManuscriptPage = () => {
     e.preventDefault();
     if (isSubmitting) return;
     if (!OJS_API_URL || !OJS_API_KEY) {
-      console.error("OJS API URL or Key not configured.");
       setStatus("❌ Configuration error. Please contact site admin.");
       return;
     }
@@ -53,54 +54,46 @@ const SubmitManuscriptPage = () => {
     setStatus("Starting submission...");
 
     try {
-      // STEP 1: Create an empty submission
+      // STEP 1: Create submission
       setStatus("Step 1/4: Creating submission...");
-      const payload = {
-  
-  sectionId: 1,
-  locale: "en_US",
-};
-
-const createSubmissionRes = await axios.post(
-  `${OJS_API_URL}/submissions`,
-  payload,
-  {
-    headers: {
-      "Authorization": `Bearer ${OJS_API_KEY}`,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-  }
-);
-
-console.log("✅ Submission created:", createSubmissionRes.data);
-
+      const createSubmissionRes = await axios.post(
+        `${OJS_API_URL}/submissions`,
+        {
+          sectionId: 1,
+          locale: "en_US",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${OJS_API_KEY}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
 
       const submissionId = createSubmissionRes.data.id;
       const publicationId = createSubmissionRes.data.currentPublicationId;
+      console.log("✅ Submission created:", submissionId);
 
-    // STEP 2: Upload manuscript file
-setStatus("Step 2/4: Uploading manuscript file...");
+      // STEP 2: Upload manuscript file
+      setStatus("Step 2/4: Uploading manuscript file...");
+      const formData = new FormData();
+      formData.append("file", paperFile);
+      formData.append("fileStage", "SUBMISSION_FILE"); // ✅ must be inside body
 
-const formData = new FormData();
-formData.append("file", paperFile);
-formData.append("fileStage", "SUBMISSION_FILE"); // ✅ move inside body
+      await axios.post(
+        `${OJS_API_URL}/submissions/${submissionId}/files`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${OJS_API_KEY}`,
+            Accept: "application/json",
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-await axios.post(
-  `${OJS_API_URL}/submissions/${submissionId}/files`, // ✅ no query param
-  formData,
-  {
-    headers: {
-      "Authorization": `Bearer ${OJS_API_KEY}`,
-      "X-Authorization": `Bearer ${OJS_API_KEY}`, // ✅ add backup header
-      "Accept": "application/json",
-      "Content-Type": "multipart/form-data"
-    },
-  }
-);
-
-
-      // STEP 3: Update publication metadata (title & abstract)
+      // STEP 3: Update title and abstract
       setStatus("Step 3/4: Adding title and abstract...");
       await axios.put(
         `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}`,
@@ -108,10 +101,16 @@ await axios.post(
           title: { en_US: form.paperTitle },
           abstract: { en_US: form.abstract },
         },
-        { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${OJS_API_KEY}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
       );
 
-      // STEP 4: Add authors (contributors)
+      // STEP 4: Add authors
       setStatus("Step 4/4: Adding author details...");
       for (let i = 0; i < authors.length; i++) {
         const author = authors[i];
@@ -126,19 +125,25 @@ await axios.post(
           email: author.email,
           country: "IN",
           [`affiliation[en_US]`]: "Independent Researcher",
-          userGroupId: 14, // Author group ID
+          userGroupId: 14,
           includeInBrowse: true,
-          primaryContact: i === 0, // first author = primary contact
+          primaryContact: i === 0,
         };
 
         await axios.post(
           `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}/contributors`,
           authorPayload,
-          { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
+          {
+            headers: {
+              Authorization: `Bearer ${OJS_API_KEY}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
         );
       }
 
-      // ✅ Success
+      // ✅ Done
       setUniqueCode(submissionId);
       setStatus("✅ Paper submitted successfully!");
       setForm({ paperTitle: "", abstract: "" });
@@ -146,9 +151,10 @@ await axios.post(
       setPaperFile(null);
       e.target.reset();
     } catch (error) {
-      console.error("Submission failed:", error.response ? error.response.data : error.message);
+      console.error("Submission failed:", error.response || error.message);
       let msg = "Check console for details.";
-      if (error.response?.data?.errorMessage) msg = error.response.data.errorMessage;
+      if (error.response?.data?.errorMessage)
+        msg = error.response.data.errorMessage;
       setStatus(`❌ Failed to submit paper. OJS said: "${msg}"`);
     } finally {
       setIsSubmitting(false);
@@ -158,8 +164,6 @@ await axios.post(
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
-
-      {/* Hero Section */}
       <section
         className="relative bg-blue-900 mt-33 text-white py-20 px-4 md:px-20 overflow-hidden"
         style={{
@@ -172,21 +176,31 @@ await axios.post(
           <h1 className="text-4xl md:text-5xl font-bold" data-aos="fade-down">
             Submit Your <span className="text-orange-400">Manuscript</span>
           </h1>
-          <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
-            Upload your research paper and get a unique tracking code to check its status anytime.
+          <p
+            className="mt-4 text-lg max-w-2xl mx-auto"
+            data-aos="fade-up"
+          >
+            Upload your research paper and get a unique tracking code to check
+            its status anytime.
           </p>
         </div>
       </section>
 
-      {/* Form Section */}
       <section className="py-16 bg-white px-6 md:px-20">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
-          <form className="space-y-6" data-aos="fade-right" onSubmit={handleSubmit}>
-            <h2 className="text-3xl font-bold text-blue-800">Upload Manuscript</h2>
+          <form
+            className="space-y-6"
+            data-aos="fade-right"
+            onSubmit={handleSubmit}
+          >
+            <h2 className="text-3xl font-bold text-blue-800">
+              Upload Manuscript
+            </h2>
 
-            {/* Paper Title */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">Paper Title</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Paper Title
+              </label>
               <input
                 type="text"
                 name="paperTitle"
@@ -198,16 +212,20 @@ await axios.post(
               />
             </div>
 
-            {/* Authors */}
             <div className="space-y-4 rounded-lg border border-gray-300 p-4">
-              <label className="block text-lg font-semibold text-gray-700">Authors</label>
+              <label className="block text-lg font-semibold text-gray-700">
+                Authors
+              </label>
               {authors.map((author, index) => (
                 <div key={index} className="p-2 border rounded-md relative">
                   <p className="font-medium text-sm text-gray-500 mb-2">
-                    Author #{index + 1} {index === 0 && "(Primary Contact)"}
+                    Author #{index + 1}{" "}
+                    {index === 0 && "(Primary Contact)"}
                   </p>
                   <div className="mb-2">
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">Name</label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">
+                      Name
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -219,7 +237,9 @@ await axios.post(
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">Email</label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -250,9 +270,10 @@ await axios.post(
               </button>
             </div>
 
-            {/* Abstract */}
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">Abstract</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Abstract
+              </label>
               <textarea
                 name="abstract"
                 value={form.abstract}
@@ -264,7 +285,6 @@ await axios.post(
               />
             </div>
 
-            {/* File Upload */}
             <div>
               <label className="block mb-2 text-sm font-semibold text-gray-600">
                 Upload Paper (PDF or .docx)
@@ -282,11 +302,15 @@ await axios.post(
             <button
               type="submit"
               className={`w-full text-white px-6 py-3 rounded-lg transition font-semibold ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800"
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800"
               }`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting, Please Wait..." : "Submit Paper"}
+              {isSubmitting
+                ? "Submitting, Please Wait..."
+                : "Submit Paper"}
             </button>
 
             <p className="text-sm text-gray-600 mt-2">{status}</p>
@@ -297,16 +321,21 @@ await axios.post(
                 <span className="text-blue-800">{uniqueCode}</span>
                 <br />
                 <span className="text-gray-700 text-sm">
-                  Please copy this. It is your official Submission ID for tracking your paper.
+                  Please copy this. It is your official Submission ID for
+                  tracking your paper.
                 </span>
               </p>
             )}
           </form>
 
-          <img src={paperImg} alt="Upload Illustration" className="w-full max-w-md mx-auto" data-aos="fade-left" />
+          <img
+            src={paperImg}
+            alt="Upload Illustration"
+            className="w-full max-w-md mx-auto"
+            data-aos="fade-left"
+          />
         </div>
       </section>
-
       <Footer />
     </div>
   );
