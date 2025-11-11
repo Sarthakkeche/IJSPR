@@ -56,7 +56,7 @@ const SubmitManuscriptPage = () => {
       // STEP 1: Create an empty submission
       setStatus("Step 1/4: Creating submission...");
       const payload = {
-  contextId: 1, // Confirm this ID from your OJS database (see below)
+  
   sectionId: 1,
   locale: "en_US",
 };
