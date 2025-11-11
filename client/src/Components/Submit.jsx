@@ -37,6 +37,7 @@ const SubmitManuscriptPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   // Handles changes for the dynamic author inputs
+  // Uses 'authorIndex' to avoid conflicts
   const handleAuthorChange = (authorIndex, event) => {
     const newAuthors = authors.map((author, i) => {
       if (authorIndex === i) {
@@ -53,6 +54,7 @@ const SubmitManuscriptPage = () => {
   };
 
   // Removes an author from the list
+  // Uses 'authorIndex' to avoid conflicts
   const removeAuthor = (authorIndex) => {
     if (authors.length <= 1) return; // Don't remove the last author
     const newAuthors = authors.filter((_, i) => i !== authorIndex);
@@ -82,13 +84,13 @@ const SubmitManuscriptPage = () => {
 
       // Create the list of authors for the API
       // This includes the 'primaryContact' fix
-      const authorsForApi = authors.map((author, authorIndex) => ({
+      const authorsForApi = authors.map((author, authorIndex) => ({ // Uses 'authorIndex'
         name: author.name,
         email: author.email,
         country: "IN",
         includeInBrowse: true,
         userGroupId: 14, // We confirmed this is 14 (Author)
-        primaryContact: (authorIndex === 0) // FIX: Makes the first author the primary contact
+        primaryContact: (authorIndex === 0) // FIX: Uses 'authorIndex'
       }));
       
       const submissionData = {
@@ -236,6 +238,7 @@ const SubmitManuscriptPage = () => {
               <label className="block text-lg font-semibold text-gray-700">
                 Authors
               </label>
+              {/* Uses 'authorIndex' here */}
               {authors.map((author, authorIndex) => (
                 <div key={authorIndex} className="p-2 border rounded-md relative">
                   <p className="font-medium text-sm text-gray-500 mb-2">Author #{authorIndex + 1} {authorIndex === 0 && "(Primary Contact)"}</p>
@@ -269,7 +272,7 @@ const SubmitManuscriptPage = () => {
                       required
                     />
                   </div>
-                  {/* Remove Button (only show if not the first author) */}
+                  {/* Remove Button */}
                   {authorIndex > 0 && (
                     <button
                       type="button"
