@@ -155,40 +155,35 @@ const SubmitManuscriptPage = () => {
         primaryContact: i === 0,
       })),
     };
+const submissionResponse = await axios.post(
+  `${OJS_API_URL}/submissions`,
+  submissionData,
+  {
+    headers: {
+      "X-Api-Key": OJS_API_KEY,
+      "Content-Type": "application/json",
+    },
+  }
+);
 
-    const submissionResponse = await axios.post(
-      `${OJS_API_URL}/submissions`,
-      submissionData,
-      {
-        headers: {
-          Authorization: `Bearer ${OJS_API_KEY}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      }
-    );
+const submissionId = submissionResponse.data.id;
+console.log("✅ Submission created:", submissionId);
 
-    const submissionId = submissionResponse.data.id;
-    console.log("✅ Submission created:", submissionId);
+// Step 2: Upload file
+const fileData = new FormData();
+fileData.append("file", paperFile);
 
-    // Step 2: Upload file
-    setStatus("Step 2/2: Uploading manuscript file...");
+await axios.post(
+  `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`,
+  fileData,
+  {
+    headers: {
+      "X-Api-Key": OJS_API_KEY,
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
 
-    const fileData = new FormData();
-    fileData.append("file", paperFile, paperFile.name);
-    fileData.append("name", paperFile.name);
-    fileData.append("genreId", "1"); // usually required
-    fileData.append("mimetype", paperFile.type || "application/octet-stream");
-
-    const uploadUrl = `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`;
-
-    const uploadResponse = await axios.post(uploadUrl, fileData, {
-      headers: {
-        "X-Api-Key": OJS_API_KEY,
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json",
-      },
-    });
 
     console.log("✅ File uploaded successfully:", uploadResponse.data);
 
