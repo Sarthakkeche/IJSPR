@@ -37,9 +37,9 @@ const SubmitManuscriptPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   // Handles changes for the dynamic author inputs
-  const handleAuthorChange = (index, event) => {
+  const handleAuthorChange = (authorIndex, event) => {
     const newAuthors = authors.map((author, i) => {
-      if (index === i) {
+      if (authorIndex === i) {
         return { ...author, [event.target.name]: event.target.value };
       }
       return author;
@@ -53,9 +53,9 @@ const SubmitManuscriptPage = () => {
   };
 
   // Removes an author from the list
-  const removeAuthor = (index) => {
+  const removeAuthor = (authorIndex) => {
     if (authors.length <= 1) return; // Don't remove the last author
-    const newAuthors = authors.filter((_, i) => i !== index);
+    const newAuthors = authors.filter((_, i) => i !== authorIndex);
     setAuthors(newAuthors);
   };
 
@@ -77,20 +77,18 @@ const SubmitManuscriptPage = () => {
     setStatus("Submitting... please wait.");
 
     try {
-      // --- OJS Submission is a 2-Step Process ---
-
       // Step 1: Create the submission with ALL metadata
       setStatus("Step 1/2: Submitting all article data...");
 
       // Create the list of authors for the API
       // This includes the 'primaryContact' fix
-      const authorsForApi = authors.map((author, index) => ({
+      const authorsForApi = authors.map((author, authorIndex) => ({
         name: author.name,
         email: author.email,
         country: "IN",
         includeInBrowse: true,
         userGroupId: 14, // We confirmed this is 14 (Author)
-        primaryContact: (index === 0) // FIX: Makes the first author the primary contact
+        primaryContact: (authorIndex === 0) // FIX: Makes the first author the primary contact
       }));
       
       const submissionData = {
@@ -103,23 +101,21 @@ const SubmitManuscriptPage = () => {
       const submissionResponse = await axios.post(
         `${OJS_API_URL}/submissions`,
         submissionData,
-        // FIX: Use 'Authorization' header
         { headers: { 'Authorization': `Bearer ${OJS_API_KEY}` } }
       );
 
       const submissionId = submissionResponse.data.id;
 
-      // Step 2: Upload the manuscript file to the new submission
+      // Step 2: Upload the manuscript file
       setStatus("Step 2/2: Uploading manuscript file...");
       
       const fileData = new FormData();
       fileData.append('file', paperFile);
-      fileData.append('fileStage', '2'); // FIX: '2' = Submission File
+      fileData.append('fileStage', '2'); // '2' = Submission File
 
       await axios.post(
         `${OJS_API_URL}/submissions/${submissionId}/files`,
         fileData,
-        // FIX: Use 'Authorization' header
         { headers: { 'Authorization': `Bearer ${OJS_API_KEY}`, 'Content-Type': 'multipart/form-data' } }
       );
 
@@ -133,7 +129,6 @@ const SubmitManuscriptPage = () => {
       setIsSubmitting(false);
 
     } catch (error) {
-      // This will give a specific error message
       console.error("Submission failed:", error.response ? error.response.data : error.message);
       
       let ojsErrorMessage = "Check console for details.";
@@ -158,7 +153,7 @@ const SubmitManuscriptPage = () => {
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
 
-      {/* Hero Section (no changes) */}
+      {/* Hero Section */}
       <section
         className="relative bg-blue-900 mt-33 text-white py-20 px-4 md:px-20 overflow-hidden"
         style={{
@@ -178,7 +173,7 @@ const SubmitManuscriptPage = () => {
         </div>
       </section>
 
-      {/* ⚠️ Important Info Section (no changes) */}
+      {/* Important Info Section */}
       <section className="px-6 md:px-20 py-10">
         <div
           className="relative bg-white text-gray-800 p-6 rounded-xl shadow-lg border-4 animate-borderGlow"
@@ -207,7 +202,7 @@ const SubmitManuscriptPage = () => {
         </div>
       </section>
 
-      {/* Form Section (MODIFIED) */}
+      {/* Form Section */}
       <section className="py-16 bg-white px-6 md:px-20">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
           {/* Submit Form */}
@@ -236,14 +231,14 @@ const SubmitManuscriptPage = () => {
               />
             </div>
 
-            {/* --- NEW DYNAMIC AUTHOR SECTION --- */}
+            {/* --- DYNAMIC AUTHOR SECTION --- */}
             <div className="space-y-4 rounded-lg border border-gray-300 p-4">
               <label className="block text-lg font-semibold text-gray-700">
                 Authors
               </label>
-              {authors.map((author, index) => (
-                <div key={index} className="p-2 border rounded-md relative">
-                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{index + 1} {index === 0 && "(Primary Contact)"}</p>
+              {authors.map((author, authorIndex) => (
+                <div key={authorIndex} className="p-2 border rounded-md relative">
+                  <p className="font-medium text-sm text-gray-500 mb-2">Author #{authorIndex + 1} {authorIndex === 0 && "(Primary Contact)"}</p>
                   {/* Author Name Input */}
                   <div className="mb-2">
                     <label className="block mb-1 text-xs font-semibold text-gray-600">
@@ -253,7 +248,7 @@ const SubmitManuscriptPage = () => {
                       type="text"
                       name="name"
                       value={author.name}
-                      onChange={(e) => handleAuthorChange(index, e)}
+                      onChange={(e) => handleAuthorChange(authorIndex, e)}
                       placeholder="Enter full name"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
                       required
@@ -268,17 +263,17 @@ const SubmitManuscriptPage = () => {
                       type="email"
                       name="email"
                       value={author.email}
-                      onChange={(e) => handleAuthorChange(index, e)}
+                      onChange={(e) => handleAuthorChange(authorIndex, e)}
                       placeholder="Enter author's email (required)"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
                       required
                     />
                   </div>
                   {/* Remove Button (only show if not the first author) */}
-                  {index > 0 && (
+                  {authorIndex > 0 && (
                     <button
                       type="button"
-                      onClick={() => removeAuthor(index)}
+                      onClick={() => removeAuthor(authorIndex)}
                       className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold"
                     >
                       &times;
