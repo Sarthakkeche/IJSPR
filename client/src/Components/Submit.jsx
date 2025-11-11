@@ -22,24 +22,19 @@ const SubmitManuscriptPage = () => {
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAuthorChange = (index, e) => {
-    const newAuthors = authors.map((author, i) =>
-      i === index ? { ...author, [e.target.name]: e.target.value } : author
+    setAuthors((prev) =>
+      prev.map((a, i) => (i === index ? { ...a, [e.target.name]: e.target.value } : a))
     );
-    setAuthors(newAuthors);
   };
 
-  const addAuthor = () =>
-    setAuthors([...authors, { name: "", email: "" }]);
-
+  const addAuthor = () => setAuthors((prev) => [...prev, { name: "", email: "" }]);
   const removeAuthor = (index) => {
     if (authors.length <= 1) return;
-    setAuthors(authors.filter((_, i) => i !== index));
+    setAuthors((prev) => prev.filter((_, i) => i !== index));
   };
-
   const handleFileChange = (e) => setPaperFile(e.target.files[0]);
 
   const handleSubmit = async (e) => {
@@ -49,37 +44,38 @@ const SubmitManuscriptPage = () => {
       setStatus("❌ Configuration error. Please contact site admin.");
       return;
     }
+    if (!paperFile) {
+      setStatus("❌ Please choose a file.");
+      return;
+    }
 
     setIsSubmitting(true);
     setStatus("Starting submission...");
 
     try {
-      // STEP 1: Create submission
+      // STEP 1 — Create submission (no contextId here)
       setStatus("Step 1/4: Creating submission...");
       const createSubmissionRes = await axios.post(
         `${OJS_API_URL}/submissions`,
-        {
-          sectionId: 1,
-          locale: "en_US",
-        },
+        { sectionId: 1, locale: "en_US" },
         {
           headers: {
             Authorization: `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "application/json",
             Accept: "application/json",
           },
         }
       );
-
       const submissionId = createSubmissionRes.data.id;
       const publicationId = createSubmissionRes.data.currentPublicationId;
       console.log("✅ Submission created:", submissionId);
 
-      // STEP 2: Upload manuscript file
+      // STEP 2 — Upload manuscript file
+      // IMPORTANT: do NOT set Content-Type for FormData (browser adds boundary)
       setStatus("Step 2/4: Uploading manuscript file...");
       const formData = new FormData();
-      formData.append("file", paperFile);
-      formData.append("fileStage", "SUBMISSION_FILE"); // ✅ must be inside body
+      formData.append("file", paperFile, paperFile.name);
+      // OJS expects fileStage in the body. Use the canonical string constant.
+      formData.append("fileStage", "SUBMISSION_FILE");
 
       await axios.post(
         `${OJS_API_URL}/submissions/${submissionId}/files`,
@@ -88,12 +84,14 @@ const SubmitManuscriptPage = () => {
           headers: {
             Authorization: `Bearer ${OJS_API_KEY}`,
             Accept: "application/json",
-            "Content-Type": "multipart/form-data",
+            // NOTE: no "Content-Type" here on purpose
           },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
         }
       );
 
-      // STEP 3: Update title and abstract
+      // STEP 3 — Title & abstract on the publication
       setStatus("Step 3/4: Adding title and abstract...");
       await axios.put(
         `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}`,
@@ -104,27 +102,26 @@ const SubmitManuscriptPage = () => {
         {
           headers: {
             Authorization: `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "application/json",
             Accept: "application/json",
           },
         }
       );
 
-      // STEP 4: Add authors
+      // STEP 4 — Add contributors (authors)
       setStatus("Step 4/4: Adding author details...");
       for (let i = 0; i < authors.length; i++) {
         const author = authors[i];
-        const nameParts = author.name.split(" ");
-        const givenName = nameParts.slice(0, -1).join(" ") || author.name;
-        const familyName = nameParts.slice(-1).join(" ") || "";
+        const parts = (author.name || "").trim().split(/\s+/);
+        const givenName = parts.length > 1 ? parts.slice(0, -1).join(" ") : author.name;
+        const familyName = parts.length > 1 ? parts.slice(-1).join(" ") : "";
 
-        const authorPayload = {
-          [`givenName[en_US]`]: givenName,
-          [`familyName[en_US]`]: familyName,
-          [`preferredPublicName[en_US]`]: author.name,
+        const payload = {
+          ["givenName[en_US]"]: givenName,
+          ["familyName[en_US]"]: familyName,
+          ["preferredPublicName[en_US]"]: author.name,
           email: author.email,
           country: "IN",
-          [`affiliation[en_US]`]: "Independent Researcher",
+          ["affiliation[en_US]"]: "Independent Researcher",
           userGroupId: 14,
           includeInBrowse: true,
           primaryContact: i === 0,
@@ -132,18 +129,17 @@ const SubmitManuscriptPage = () => {
 
         await axios.post(
           `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}/contributors`,
-          authorPayload,
+          payload,
           {
             headers: {
               Authorization: `Bearer ${OJS_API_KEY}`,
-              "Content-Type": "application/json",
               Accept: "application/json",
             },
           }
         );
       }
 
-      // ✅ Done
+      // Done
       setUniqueCode(submissionId);
       setStatus("✅ Paper submitted successfully!");
       setForm({ paperTitle: "", abstract: "" });
@@ -153,8 +149,9 @@ const SubmitManuscriptPage = () => {
     } catch (error) {
       console.error("Submission failed:", error.response || error.message);
       let msg = "Check console for details.";
-      if (error.response?.data?.errorMessage)
-        msg = error.response.data.errorMessage;
+      const data = error.response?.data;
+      if (data?.errorMessage) msg = data.errorMessage;
+      if (data?.fileStage?.[0]) msg = data.fileStage[0];
       setStatus(`❌ Failed to submit paper. OJS said: "${msg}"`);
     } finally {
       setIsSubmitting(false);
@@ -176,31 +173,19 @@ const SubmitManuscriptPage = () => {
           <h1 className="text-4xl md:text-5xl font-bold" data-aos="fade-down">
             Submit Your <span className="text-orange-400">Manuscript</span>
           </h1>
-          <p
-            className="mt-4 text-lg max-w-2xl mx-auto"
-            data-aos="fade-up"
-          >
-            Upload your research paper and get a unique tracking code to check
-            its status anytime.
+          <p className="mt-4 text-lg max-w-2xl mx-auto" data-aos="fade-up">
+            Upload your research paper and get a unique tracking code to check its status anytime.
           </p>
         </div>
       </section>
 
       <section className="py-16 bg-white px-6 md:px-20">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
-          <form
-            className="space-y-6"
-            data-aos="fade-right"
-            onSubmit={handleSubmit}
-          >
-            <h2 className="text-3xl font-bold text-blue-800">
-              Upload Manuscript
-            </h2>
+          <form className="space-y-6" data-aos="fade-right" onSubmit={handleSubmit}>
+            <h2 className="text-3xl font-bold text-blue-800">Upload Manuscript</h2>
 
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">
-                Paper Title
-              </label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">Paper Title</label>
               <input
                 type="text"
                 name="paperTitle"
@@ -213,19 +198,14 @@ const SubmitManuscriptPage = () => {
             </div>
 
             <div className="space-y-4 rounded-lg border border-gray-300 p-4">
-              <label className="block text-lg font-semibold text-gray-700">
-                Authors
-              </label>
+              <label className="block text-lg font-semibold text-gray-700">Authors</label>
               {authors.map((author, index) => (
                 <div key={index} className="p-2 border rounded-md relative">
                   <p className="font-medium text-sm text-gray-500 mb-2">
-                    Author #{index + 1}{" "}
-                    {index === 0 && "(Primary Contact)"}
+                    Author #{index + 1} {index === 0 && "(Primary Contact)"}
                   </p>
                   <div className="mb-2">
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">
-                      Name
-                    </label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">Name</label>
                     <input
                       type="text"
                       name="name"
@@ -237,9 +217,7 @@ const SubmitManuscriptPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block mb-1 text-xs font-semibold text-gray-600">
-                      Email
-                    </label>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600">Email</label>
                     <input
                       type="email"
                       name="email"
@@ -271,9 +249,7 @@ const SubmitManuscriptPage = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-semibold text-gray-600">
-                Abstract
-              </label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">Abstract</label>
               <textarea
                 name="abstract"
                 value={form.abstract}
@@ -302,40 +278,30 @@ const SubmitManuscriptPage = () => {
             <button
               type="submit"
               className={`w-full text-white px-6 py-3 rounded-lg transition font-semibold ${
-                isSubmitting
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-700 hover:bg-blue-800"
+                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800"
               }`}
               disabled={isSubmitting}
             >
-              {isSubmitting
-                ? "Submitting, Please Wait..."
-                : "Submit Paper"}
+              {isSubmitting ? "Submitting, Please Wait..." : "Submit Paper"}
             </button>
 
             <p className="text-sm text-gray-600 mt-2">{status}</p>
 
             {uniqueCode && (
               <p className="mt-4 text-green-700 font-semibold">
-                🎉 Your tracking code is:{" "}
-                <span className="text-blue-800">{uniqueCode}</span>
+                🎉 Your tracking code is: <span className="text-blue-800">{uniqueCode}</span>
                 <br />
                 <span className="text-gray-700 text-sm">
-                  Please copy this. It is your official Submission ID for
-                  tracking your paper.
+                  Please copy this. It is your official Submission ID for tracking your paper.
                 </span>
               </p>
             )}
           </form>
 
-          <img
-            src={paperImg}
-            alt="Upload Illustration"
-            className="w-full max-w-md mx-auto"
-            data-aos="fade-left"
-          />
+          <img src={paperImg} alt="Upload Illustration" className="w-full max-w-md mx-auto" data-aos="fade-left" />
         </div>
       </section>
+
       <Footer />
     </div>
   );
