@@ -79,22 +79,26 @@ console.log("✅ Submission created:", createSubmissionRes.data);
       const submissionId = createSubmissionRes.data.id;
       const publicationId = createSubmissionRes.data.currentPublicationId;
 
-      // STEP 2: Upload manuscript file
-      setStatus("Step 2/4: Uploading manuscript file...");
-      const formData = new FormData();
-      formData.append("file", paperFile);
-      formData.append("fileStage", "SUBMISSION_FILE");
+    // STEP 2: Upload manuscript file
+setStatus("Step 2/4: Uploading manuscript file...");
 
-      await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files?fileStage=SUBMISSION_FILE`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+const formData = new FormData();
+formData.append("file", paperFile);
+formData.append("fileStage", "SUBMISSION_FILE"); // ✅ move inside body
+
+await axios.post(
+  `${OJS_API_URL}/submissions/${submissionId}/files`, // ✅ no query param
+  formData,
+  {
+    headers: {
+      "Authorization": `Bearer ${OJS_API_KEY}`,
+      "X-Authorization": `Bearer ${OJS_API_KEY}`, // ✅ add backup header
+      "Accept": "application/json",
+      "Content-Type": "multipart/form-data"
+    },
+  }
+);
+
 
       // STEP 3: Update publication metadata (title & abstract)
       setStatus("Step 3/4: Adding title and abstract...");
