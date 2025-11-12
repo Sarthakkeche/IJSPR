@@ -1,36 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { useAuth } from "./AuthContext";
 
 const Account = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
+  }, []);
 
-    const storedUser = localStorage.getItem("ijrwsUser");
-    if (!storedUser) {
-      navigate("/login");
-    } else {
-      setUser(JSON.parse(storedUser));
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("ijrwsUser");
-    navigate("/login");
-  };
-
-  if (!user)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        <p>Loading account details...</p>
-      </div>
-    );
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800 min-h-screen">
@@ -50,7 +33,7 @@ const Account = () => {
             Welcome, <span className="text-orange-400">{user.name}</span>
           </h1>
           <p className="mt-4 text-lg">
-            Manage your submissions and track your research papers.
+            Manage your submissions and track your papers.
           </p>
         </div>
       </section>
@@ -64,18 +47,16 @@ const Account = () => {
             Account Details
           </h2>
 
-          <div className="space-y-4 text-gray-700">
-            <p>
-              <b>Name:</b> {user.name}
-            </p>
-            <p>
-              <b>Email:</b> {user.email}
-            </p>
-          </div>
+          <p className="mb-2 text-gray-700">
+            <b>Name:</b> {user.name}
+          </p>
+          <p className="mb-6 text-gray-700">
+            <b>Email:</b> {user.email}
+          </p>
 
           <button
-            onClick={handleLogout}
-            className="mt-8 w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition"
+            onClick={logout}
+            className="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition"
           >
             Logout
           </button>

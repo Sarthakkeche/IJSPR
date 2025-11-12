@@ -1,25 +1,26 @@
-// client/src/Components/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("ijrwsUser");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState(null);
 
+  // ✅ Load user from localStorage on app start
+  useEffect(() => {
+    const stored = localStorage.getItem("ijrwsUser");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  // ✅ Handle login and logout globally
   const login = (userData) => {
-    setUser(userData);
     localStorage.setItem("ijrwsUser", JSON.stringify(userData));
+    setUser(userData);
   };
 
   const logout = () => {
-    setUser(null);
     localStorage.removeItem("ijrwsUser");
+    setUser(null);
   };
-
-  useEffect(() => {}, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

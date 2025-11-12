@@ -5,11 +5,14 @@ import "aos/dist/aos.css";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { useAuth } from "./AuthContext"; // ✅ import context
 
 const API_URL = "https://api.ijrws.com/login.php";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ use context login
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
@@ -19,14 +22,9 @@ const Login = () => {
     AOS.init({ duration: 1000 });
   }, []);
 
-  // If already logged in, redirect to /account
-  useEffect(() => {
-    const token = localStorage.getItem("ijrwsUser");
-    if (token) navigate("/account");
-  }, [navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
       setStatus("❌ Please enter both email and password.");
       return;
@@ -39,17 +37,15 @@ const Login = () => {
       const response = await axios.post(
         API_URL,
         { email, password },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
       console.log("✅ Login response:", response.data);
 
-      if (response.data.success) {
-        localStorage.setItem("ijrwsUser", JSON.stringify(response.data.user));
+      if (response.data.status === "success") {
+        login(response.data.user); // ✅ updates AuthContext + localStorage
         setStatus("✅ Login successful! Redirecting...");
-        setTimeout(() => navigate("/account"), 1000);
+        setTimeout(() => navigate("/account"), 1000); // ✅ redirect
       } else {
         setStatus(response.data.message || "❌ Invalid credentials.");
       }
@@ -65,37 +61,30 @@ const Login = () => {
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
 
-      {/* Hero */}
       <section
         className="relative bg-blue-900 mt-32 text-white py-20 px-4 md:px-20 overflow-hidden"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(14, 12, 12, 0.85), rgba(36, 33, 33, 0.85)), url('https://ijrws.com/assets/login-bg.jpg')",
+            "linear-gradient(rgba(14,12,12,0.85),rgba(36,33,33,0.85)), url('https://ijrws.com/assets/login-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold">
-            Welcome Back to{" "}
-            <span className="text-orange-400">IJRWS</span>
+            Author <span className="text-orange-400">Login</span>
           </h1>
           <p className="mt-4 text-lg">
-            Access your author dashboard and manage your submissions.
+            Access your IJRWS account and manage your papers.
           </p>
         </div>
       </section>
 
-      {/* Login Form */}
       <section className="px-6 md:px-20 py-16 bg-white">
         <div
           data-aos="fade-up"
           className="max-w-md mx-auto bg-white p-8 shadow-lg rounded-xl border"
         >
-          <h2 className="text-2xl font-bold text-center text-blue-800 mb-6">
-            Author Login
-          </h2>
-
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block mb-2 text-sm font-semibold text-gray-600">
