@@ -242,6 +242,37 @@ for (let i = 0; i < authors.length; i++) {
 }
 console.log("✅ Authors added");
 
+// Step 5: Reassign submission ownership (so API User stops receiving emails)
+setStatus("Step 5/5: Assigning author as submission owner...");
+
+try {
+  const primaryAuthor = authors[0];
+
+  // Get user record by email (check if already exists in OJS)
+  const searchUserRes = await axios.get(
+    `${OJS_API_URL}/users?search=${encodeURIComponent(primaryAuthor.email.trim())}`,
+    { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
+  );
+
+  const matchedUser = searchUserRes.data?.items?.[0];
+  if (matchedUser) {
+    await axios.put(
+      `${OJS_API_URL}/submissions/${submissionId}`,
+      { submitterId: matchedUser.id },
+      {
+        headers: {
+          Authorization: `Bearer ${OJS_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("✅ Submission ownership transferred to:", primaryAuthor.email);
+  } else {
+    console.warn("⚠️ Author not found in OJS user database; cannot transfer ownership.");
+  }
+} catch (err) {
+  console.error("⚠️ Could not reassign submission owner:", err.response?.data || err.message);
+}
 
       // ✅ Success
       setUniqueCode(submissionId);
