@@ -122,176 +122,41 @@ const SubmitManuscriptPage = () => {
       throw err;
     }
   };
+// Replace your existing axios submission logic with this:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!paperFile) return setStatus("❌ Please select a file");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
+  setStatus("Submitting... please wait");
+  setIsSubmitting(true);
 
-    if (!OJS_API_URL || !OJS_API_KEY) {
-      setStatus("❌ Missing OJS API configuration.");
-      return;
-    }
-    if (!paperFile) {
-      setStatus("❌ Please select a file.");
-      return;
-    }
+  try {
+    const formData = new FormData();
+    formData.append("title", form.paperTitle);
+    formData.append("abstract", form.abstract);
+    formData.append("file", paperFile);
+    formData.append("authors", JSON.stringify(authors));
 
-    setIsSubmitting(true);
-    setStatus("Submitting... please wait.");
-
-    let submissionId;
-    let publicationId;
-
-    try {
-      // Step 1: Create an empty submission
-      setStatus("Step 1/4: Creating submission draft...");
-      const createSubmissionRes = await axios.post(
-        `${OJS_API_URL}/submissions`,
-        {
-          sectionId: OJS_SECTION_ID, // Use the variable from the top
-          locale: "en_US",
-        },
-        {
-          headers: {
-            // FIX 1: Use 'Authorization' header, not 'X-Api-Key'
-            "Authorization": `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        }
-      );
-
-      submissionId = createSubmissionRes.data.id;
-      publicationId = createSubmissionRes.data.currentPublicationId;
-      console.log("✅ Submission created:", submissionId);
-
-      // Step 2: Upload manuscript file
-      setStatus("Step 2/4: Uploading manuscript file...");
-
-      const formData = new FormData();
-      formData.append("file", paperFile);
-      // FIX 2: Send 'fileStage' in the body, not the URL. '2' is the correct ID.
-      formData.append("fileStage", "2"); 
-
-      await axios.post(
-        `${OJS_API_URL}/submissions/${submissionId}/files`,
-        formData,
-        {
-          headers: {
-            // FIX 1: Use 'Authorization' header
-            "Authorization": `Bearer ${OJS_API_KEY}`,
-            "Content-Type": "multipart/form-data",
-            "Accept": "application/json",
-          },
-        }
-      );
-      console.log("✅ File uploaded successfully");
-
-      // Step 3: Update publication metadata (title & abstract)
-      setStatus("Step 3/4: Adding title and abstract...");
-      await axios.put(
-        `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}`,
-        {
-          title: { en_US: form.paperTitle.trim() },
-          abstract: { en_US: form.abstract.trim() },
-        },
-        // FIX 1: Use 'Authorization' header
-        { headers: { "Authorization": `Bearer ${OJS_API_KEY}` } }
-      );
-      console.log("✅ Metadata added");
-
-      // Step 4: Add authors (contributors)
-      // Step 4: Add authors (contributors)
-setStatus("Step 4/4: Adding author details...");
-for (let i = 0; i < authors.length; i++) {
-  const author = authors[i];
-
-  const authorPayload = {
-    givenName: { en_US: author.name.trim() }, // ✅ localized
-    familyName: { en_US: "" }, // optional but avoids errors
-    email: author.email.trim(),
-    country: "IN",
-    userGroupId: OJS_AUTHOR_GROUP_ID,
-    includeInBrowse: true,
-    primaryContact: i === 0, // ✅ first author = main contact
-  };
-
-  // Create contributor
-  const authorResponse = await axios.post(
-    `${OJS_API_URL}/submissions/${submissionId}/publications/${publicationId}/contributors`,
-    authorPayload,
-    {
-      headers: { Authorization: `Bearer ${OJS_API_KEY}` },
-    }
-  );
-
-  // ✅ Reassign first author as the submission contact (instead of API user)
-  if (i === 0) {
-    await axios.put(
-      `${OJS_API_URL}/submissions/${submissionId}`,
-      { contactEmail: author.email.trim() },
-      {
-        headers: {
-          Authorization: `Bearer ${OJS_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
+    const res = await axios.post(
+      "https://api.ijrws.com/api/submitPaper.php",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
-    console.log("✅ Assigned first author as submission contact");
-  }
-}
-console.log("✅ Authors added");
 
-// Step 5: Reassign submission ownership (so API User stops receiving emails)
-setStatus("Step 5/5: Assigning author as submission owner...");
-
-try {
-  const primaryAuthor = authors[0];
-
-  // Get user record by email (check if already exists in OJS)
-  const searchUserRes = await axios.get(
-    `${OJS_API_URL}/users?search=${encodeURIComponent(primaryAuthor.email.trim())}`,
-    { headers: { Authorization: `Bearer ${OJS_API_KEY}` } }
-  );
-
-  const matchedUser = searchUserRes.data?.items?.[0];
-  if (matchedUser) {
-    await axios.put(
-      `${OJS_API_URL}/submissions/${submissionId}`,
-      { submitterId: matchedUser.id },
-      {
-        headers: {
-          Authorization: `Bearer ${OJS_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("✅ Submission ownership transferred to:", primaryAuthor.email);
-  } else {
-    console.warn("⚠️ Author not found in OJS user database; cannot transfer ownership.");
-  }
-} catch (err) {
-  console.error("⚠️ Could not reassign submission owner:", err.response?.data || err.message);
-}
-
-      // ✅ Success
-      setUniqueCode(submissionId);
+    if (res.data.status === "success") {
+      setUniqueCode(res.data.submissionId);
       setStatus("✅ Paper submitted successfully!");
-
-      // Reset form
-      setForm({ paperTitle: "", abstract: "" });
-      setAuthors([{ name: "", email: "" }]);
-      setPaperFile(null);
-      e.target.reset();
-
-    } catch (error) {
-      console.error("❌ Submission failed:", error.response?.data || error.message);
-      const msg = parseOjsError(error); // Use your excellent error parser
-      setStatus(`❌ Failed: ${msg}`);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      setStatus("❌ " + (res.data.message || "Submission failed"));
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setStatus("❌ Server error");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
