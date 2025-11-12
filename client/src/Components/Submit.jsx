@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import paperImg from "../assets/paper.jpg";
 import uploadBg from "../assets/uplaod.jpg";
-
+import apiClient from "../utils/apiClient";
 // ===== ENV =====
 const OJS_API_URL =
   import.meta.env.VITE_OJS_API_URL || import.meta.env.VITE_API_URL;
@@ -125,38 +125,47 @@ const SubmitManuscriptPage = () => {
 // Replace your existing axios submission logic with this:
 const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!paperFile) return setStatus("❌ Please select a file");
-
-  setStatus("Submitting... please wait");
-  setIsSubmitting(true);
+  setLoading(true);
+  setError(null);
 
   try {
-    const formData = new FormData();
-    formData.append("title", form.paperTitle);
-    formData.append("abstract", form.abstract);
-    formData.append("file", paperFile);
-    formData.append("authors", JSON.stringify(authors));
+    // Step 1: Create a submission in OJS
+    const submissionRes = await apiClient.post("/submissions", {
+      sectionId: 1,
+      locale: "en_US",
+      publications: [
+        {
+          title: { en_US: "Your Paper Title" },
+          abstract: { en_US: abstract }, // from form input
+        },
+      ],
+    });
 
-    const res = await axios.post(
-      "https://api.ijrws.com/api/submitPaper.php",
+    const submissionId = submissionRes.data.id;
+    console.log("Created submission:", submissionId);
+
+    // Step 2: Upload the file to that submission
+    const formData = new FormData();
+    formData.append("fileStage", 1);
+    formData.append("name", "Manuscript");
+    formData.append("upload", file); // file from your form
+
+    const fileRes = await apiClient.post(
+      `/submissions/${submissionId}/files`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
 
-    if (res.data.status === "success") {
-      setUniqueCode(res.data.submissionId);
-      setStatus("✅ Paper submitted successfully!");
-    } else {
-      setStatus("❌ " + (res.data.message || "Submission failed"));
-    }
+    console.log("File uploaded:", fileRes.data);
+
+    alert("✅ Paper submitted successfully!");
   } catch (err) {
-    console.error(err);
-    setStatus("❌ Server error");
+    console.error("❌ Submission failed:", err);
+    alert("❌ Submission failed!");
   } finally {
-    setIsSubmitting(false);
+    setLoading(false);
   }
 };
-
   return (
     <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
