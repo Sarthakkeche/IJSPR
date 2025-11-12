@@ -43,7 +43,7 @@ const RoutesConfig = () => {
     // --- New Routes ---
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Register /> },
-    { path: "/account", element: <ProtectedRoute element={<Account />} /> },
+        { path:"/account", element:<Account />},
 
 
     // ✅ Protect Submit & Status pages

@@ -1,114 +1,171 @@
-import React, { useState } from "react";
-import Navbar from "../Components/Navbar";
-import Footer from "../Components/Footer";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import axios from "axios";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+
+const API_URL = "https://api.ijrws.com/register.php";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [status, setStatus] = useState(null);
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    AOS.init({ duration: 1000 });
+  }, []);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    if (!form.name || !form.email || !form.password) {
+      setStatus("❌ Please fill all fields.");
+      return;
+    }
+
     setLoading(true);
-    setStatus(null);
+    setStatus("⏳ Registering...");
 
     try {
-      const response = await fetch("https://api.ijrws.com/register.php", {
-        method: "POST",
+      const response = await axios.post(API_URL, form, {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-      setLoading(false);
+      console.log("✅ Register response:", response.data);
 
-      if (result.status === "success") {
-        setStatus({ type: "success", message: "Registration successful! You can now log in." });
-        setFormData({ name: "", email: "", password: "" });
+      if (response.data.status === "success") {
+        setStatus("✅ Registration successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 1500);
       } else {
-        setStatus({ type: "error", message: result.message });
+        setStatus(response.data.message || "❌ Registration failed.");
       }
-    } catch (err) {
-      setStatus({ type: "error", message: "Server error. Please try again." });
+    } catch (error) {
+      console.error("❌ Registration failed:", error);
+      setStatus("❌ Server error. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gradient-to-b from-white to-blue-50 min-h-screen">
+    <div className="bg-gradient-to-b from-white to-blue-50 text-gray-800">
       <Navbar />
 
-      <section className="py-20 px-6 md:px-20">
-        <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-lg p-8 border border-gray-200" data-aos="fade-up">
-          <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">
-            Create an <span className="text-orange-500">IJRWS Account</span>
+      {/* Hero Section */}
+      <section
+        className="relative bg-blue-900 mt-32 text-white py-20 px-4 md:px-20 overflow-hidden"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(14,12,12,0.85),rgba(36,33,33,0.85)), url('https://ijrws.com/assets/register-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold">
+            Create Your <span className="text-orange-400">IJRWS</span> Account
+          </h1>
+          <p className="mt-4 text-lg">
+            Join our global research community and start publishing today.
+          </p>
+        </div>
+      </section>
+
+      {/* Register Form */}
+      <section className="px-6 md:px-20 py-16 bg-white">
+        <div
+          data-aos="fade-up"
+          className="max-w-md mx-auto bg-white p-8 shadow-lg rounded-xl border"
+        >
+          <h2 className="text-2xl font-bold text-center text-blue-800 mb-6">
+            Register as Author
           </h2>
 
-          {status && (
-            <div
-              className={`text-center mb-4 px-4 py-2 rounded ${
-                status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-              }`}
-            >
-              {status.message}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleRegister} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Full Name</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="name"
-                value={formData.name}
+                value={form.name}
                 onChange={handleChange}
+                placeholder="Enter your full name"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
-                className="w-full mt-2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
-                value={formData.email}
+                value={form.email}
                 onChange={handleChange}
+                placeholder="Enter your email"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
-                className="w-full mt-2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block mb-2 text-sm font-semibold text-gray-600">
+                Password
+              </label>
               <input
                 type="password"
                 name="password"
-                value={formData.password}
+                value={form.password}
                 onChange={handleChange}
+                placeholder="Enter your password"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 required
-                className="w-full mt-2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 text-white font-semibold py-2 rounded-md hover:bg-orange-600 transition"
+              className={`w-full text-white px-6 py-3 rounded-lg transition font-semibold ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800"
+              }`}
             >
               {loading ? "Registering..." : "Register"}
             </button>
+
+            {status && (
+              <p
+                className={`text-center font-medium ${
+                  status.startsWith("✅")
+                    ? "text-green-600"
+                    : status.startsWith("❌")
+                    ? "text-red-600"
+                    : "text-gray-700"
+                }`}
+              >
+                {status}
+              </p>
+            )}
           </form>
 
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="mt-6 text-center text-sm">
             Already have an account?{" "}
-            <a href="/login" className="text-blue-600 font-medium hover:underline">
+            <a
+              href="/login"
+              className="text-blue-600 hover:text-blue-800 font-semibold"
+            >
               Login here
             </a>
           </p>
