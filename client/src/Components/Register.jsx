@@ -6,7 +6,7 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-const API_URL = "https://api.ijrws.com/register.php";
+const API_URL = "https://api.ijrws.com/register_ojs.php";
 
 const Register = () => {
   const navigate = useNavigate();

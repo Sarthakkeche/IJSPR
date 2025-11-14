@@ -43,7 +43,16 @@ const Login = () => {
       console.log("✅ Login response:", response.data);
 
       if (response.data.status === "success") {
-        login(response.data.user); // ✅ updates AuthContext + localStorage
+        login(response.data.user);
+        const ojsLogin = await axios.post(
+    "https://api.ijrws.com/login_ojs.php",
+    { email, password },
+    { headers: { "Content-Type": "application/json" } }
+  ); 
+  if (ojsLogin.data.token) {
+    localStorage.setItem("ojsToken", ojsLogin.data.token);
+  }
+   // ✅ updates AuthContext + localStorage
         setStatus("✅ Login successful! Redirecting...");
         setTimeout(() => navigate("/account"), 1000); // ✅ redirect
       } else {
